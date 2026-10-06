@@ -1,0 +1,1800 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WGS Research Atlas V7.3 — Unclipped Hero Venn</title>
+<style>
+:root{--ink:#1f2430;--muted:#687080;--line:#d9dde6;--paper:#f7f6f2;--panel:#fff;--violet:#705c91;--rose:#a45d6d;--gold:#b18438;--green:#507665;--blue:#4e718b;--soft:#eee9f5}
+*{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;color:var(--ink);background:var(--paper)}
+button{font:inherit;color:inherit}.shell{min-height:100vh;display:grid;grid-template-rows:auto 1fr}
+header{padding:18px 28px 14px;border-bottom:1px solid var(--line);background:#fbfaf7;display:flex;justify-content:space-between;gap:20px;align-items:end}
+.kicker{font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--violet);font-weight:850}.title{font-family:Georgia,serif;font-size:29px;margin:3px 0}.subtitle{font-size:13px;color:var(--muted);max-width:680px}
+.progress{display:flex;gap:7px}.progress button{border:1px solid var(--line);background:white;border-radius:999px;padding:7px 10px;font-size:11px;cursor:pointer}.progress button.on{background:var(--ink);color:white}
+main{position:relative;overflow:visible;min-height:720px}.stage{display:none;position:absolute;inset:0;padding:22px 28px 30px}.stage.on{display:block}
+.stagehead{display:flex;justify-content:space-between;align-items:start;gap:25px}.stagehead h2{font-family:Georgia,serif;font-size:26px;margin:0 0 5px}.stagehead p{margin:0;color:var(--muted);font-size:13px;max-width:650px}.next{border:0;border-radius:999px;background:var(--ink);color:white;padding:9px 14px;cursor:pointer}
+.canvas{position:relative;height:610px;margin-top:15px;border:1px solid var(--line);border-radius:20px;background:white;overflow:hidden;box-shadow:0 8px 28px #20232a0a}
+.center{position:absolute;left:50%;top:49%;transform:translate(-50%,-50%);width:230px;min-height:115px;border-radius:50%;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:18px;background:var(--ink);color:white;z-index:4;box-shadow:0 12px 30px #1f243033}
+.center small{opacity:.7;text-transform:uppercase;letter-spacing:.1em}.center strong{font-family:Georgia,serif;font-size:18px;margin-top:5px}
+.orbit{position:absolute;border:1px dashed #cfd4dc;border-radius:50%;left:50%;top:49%;transform:translate(-50%,-50%);pointer-events:none}.o1{width:480px;height:310px}.o2{width:820px;height:500px}
+.qnode{position:absolute;transform:translate(-50%,-50%);width:145px;height:82px;border-radius:18px;border:1px solid var(--line);background:#fff;padding:9px;text-align:center;cursor:pointer;z-index:5;box-shadow:0 5px 16px #20232a10;transition:.2s}
+.qnode:hover,.qnode.on{transform:translate(-50%,-50%) scale(1.05);border-color:var(--violet);box-shadow:0 8px 24px #705c9125}.qnode b{display:block;font-size:13px}.qnode span{font-size:10.5px;color:var(--muted)}
+.flowbox{position:absolute;width:180px;padding:10px;border-radius:14px;background:#f8f7fb;border:1px solid #d9d3e5;opacity:0;transition:.3s;z-index:3}.flowbox.show{opacity:1}.flowbox b{font-size:12px}.flowbox div{font-size:10.5px;color:var(--muted);margin-top:3px}
+.svg{position:absolute;inset:0;width:100%;height:100%;z-index:1}.svg line,.svg path{stroke:#c9cdd5;stroke-width:1.5;fill:none}.svg .active{stroke:var(--violet);stroke-width:3}
+.legend{position:absolute;left:18px;bottom:15px;font-size:11px;color:var(--muted);background:#ffffffdd;padding:8px 10px;border-radius:10px;z-index:8}
+
+/* Missing voices */
+.population{position:absolute;left:7%;right:7%;top:14%;bottom:12%;display:grid;grid-template-columns:1.2fr .8fr;gap:22px}
+.bigcat{border:1px solid var(--line);border-radius:28px;padding:25px;background:#fbfafc;display:flex;flex-direction:column;justify-content:center;align-items:center;position:relative;overflow:hidden}
+.bigcircle{width:260px;height:260px;border-radius:50%;background:var(--soft);border:2px solid #c9bed9;display:flex;align-items:center;justify-content:center;text-align:center;font-family:Georgia,serif;font-size:27px;transition:.5s}
+.bigcircle.split{width:130px;height:130px;font-size:18px;position:absolute;left:35px;top:35px}
+.dimensions{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;align-content:center}.dim{border:1px solid var(--line);border-radius:15px;padding:14px;background:white;cursor:pointer;text-align:left}.dim.on{border-color:var(--rose);background:#fff7f8}.dim b{display:block}.dim small{color:var(--muted)}
+.fragments{position:absolute;left:190px;right:20px;top:25px;bottom:20px;display:none}.fragments.show{display:block}.bubble{position:absolute;border-radius:50%;border:1px solid #cdb7bd;background:#f8e9ed;display:flex;align-items:center;justify-content:center;text-align:center;padding:7px;font-size:11px}.questionrewrite{position:absolute;left:25px;right:25px;bottom:18px;border-top:1px solid var(--line);padding-top:10px;font-size:13px;color:var(--muted)}.questionrewrite strong{color:var(--ink)}
+
+/* evidence map */
+.axes{position:absolute;inset:55px 75px 65px}.haxis,.vaxis{position:absolute;background:#bfc5cf}.haxis{height:1px;left:0;right:0;top:50%}.vaxis{width:1px;top:0;bottom:0;left:50%}.axislabel{position:absolute;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#707887;font-weight:800}.leftlab{left:0;top:50%;transform:translateY(-28px)}.rightlab{right:0;top:50%;transform:translateY(-28px)}.toplab{top:0;left:50%;transform:translate(-50%,-20px)}.bottomlab{bottom:0;left:50%;transform:translate(-50%,20px)}
+.source{position:absolute;transform:translate(-50%,-50%);width:104px;height:104px;border-radius:50%;display:flex;align-items:center;justify-content:center;text-align:center;padding:9px;border:1px solid #c9cdd5;background:#fff;box-shadow:0 5px 15px #20232a10;cursor:pointer;font-size:11px;font-weight:750;transition:.25s}.source:hover{transform:translate(-50%,-50%) scale(1.08)}.source.theory{background:#f2edf7}.source.emp{background:#edf4f8}.source.community{border-style:dashed}.source.active{box-shadow:0 0 0 5px #705c9120}
+.mapnote{position:absolute;right:18px;bottom:15px;width:260px;padding:10px 12px;border-radius:12px;background:#fffdf4;border:1px solid #e3d7b7;font-size:11px}
+
+/* heat map */
+.heatwrap{position:absolute;inset:35px 40px 40px;display:grid;grid-template-columns:170px repeat(6,1fr);grid-auto-rows:52px;gap:5px;align-items:stretch}
+.hcell{border-radius:9px;display:flex;align-items:center;justify-content:center;text-align:center;padding:5px;font-size:10.5px;border:1px solid transparent;transition:.2s}.hhead{font-weight:800;background:#f5f4f1}.rowhead{justify-content:flex-start;font-weight:750;background:#fafafa;padding-left:10px}.fit3{background:#6d5b8d;color:white}.fit2{background:#c6bad8}.fit1{background:#eeeaf3}.fit0{background:#f7f7f5;color:#8c929c}.hcol{cursor:pointer}.hcol.sel{outline:2px solid var(--gold);outline-offset:1px}.heatnote{position:absolute;left:40px;bottom:12px;font-size:11px;color:var(--muted)}
+@media(max-width:900px){header{align-items:start;flex-direction:column}.progress{flex-wrap:wrap}.stage{padding:15px}.canvas{height:690px}.o2{width:92%}.population{grid-template-columns:1fr}.bigcat{min-height:320px}.heatwrap{grid-template-columns:130px repeat(6,120px);overflow-x:auto}.canvas.heat{overflow:auto}}
+
+/* V2 experimental tabs 1–2 */
+.disc-canvas{position:relative;height:610px;margin-top:15px;border:1px solid var(--line);border-radius:20px;background:white;overflow:hidden;box-shadow:0 8px 28px #20232a0a}
+.disc-center{position:absolute;left:50%;top:48%;transform:translate(-50%,-50%);width:220px;height:150px;border-radius:50%;background:var(--ink);color:white;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:18px;z-index:5;box-shadow:0 12px 30px #1f243033}
+.disc-center small{opacity:.65;text-transform:uppercase;letter-spacing:.1em}.disc-center strong{font-family:Georgia,serif;font-size:19px;margin-top:5px}
+.disc{position:absolute;transform:translate(-50%,-50%);width:150px;min-height:70px;border:1px solid var(--line);border-radius:18px;background:#fff;padding:10px;cursor:pointer;z-index:5;text-align:center;box-shadow:0 5px 16px #20232a10;transition:.2s}.disc:hover,.disc.on{transform:translate(-50%,-50%) scale(1.05);border-color:var(--violet);background:#f6f2fa}.disc b{font-size:12px}.disc small{display:block;color:var(--muted);font-size:10px;margin-top:3px}
+.disc-detail{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);width:min(720px,75%);border:1px solid #d7d1df;border-radius:15px;background:#fff;padding:12px 16px;z-index:7;display:grid;grid-template-columns:1.5fr 1fr;gap:15px;box-shadow:0 7px 20px #20232a12}.disc-detail .label{font-size:9px;text-transform:uppercase;letter-spacing:.11em;color:var(--violet);font-weight:900}.disc-detail strong{display:block;margin-top:3px;font-family:Georgia,serif;font-size:15px}.disc-detail p{margin:4px 0 0;color:var(--muted);font-size:11px}
+.disc-ring{position:absolute;left:50%;top:48%;transform:translate(-50%,-50%);width:720px;height:390px;border:1px dashed #cdd1d8;border-radius:50%;z-index:1}
+.disc-line{position:absolute;height:1px;background:#d3d6dc;transform-origin:0 0;z-index:2}
+.inter-canvas{position:relative;height:610px;margin-top:15px;border:1px solid var(--line);border-radius:20px;background:white;overflow:hidden;box-shadow:0 8px 28px #20232a0a}
+.inter-core{position:absolute;left:50%;top:43%;transform:translate(-50%,-50%);width:210px;height:130px;border-radius:50%;background:var(--ink);color:white;display:flex;align-items:center;justify-content:center;text-align:center;font-family:Georgia,serif;font-size:19px;padding:20px;z-index:5}
+.layer{position:absolute;transform:translate(-50%,-50%);border:1px solid var(--line);background:white;border-radius:999px;padding:9px 13px;font-size:11px;font-weight:800;cursor:pointer;z-index:5;box-shadow:0 4px 13px #20232a10}.layer.on{background:#fff2f4;border-color:var(--rose);box-shadow:0 0 0 4px #a45d6d16}.layer.gender{background:#f1edf6;border-color:#c9bdd9}
+.consequence{position:absolute;bottom:16px;left:4%;right:4%;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;z-index:7}.conbox{border:1px solid var(--line);border-radius:13px;background:#fff;padding:10px;min-height:100px}.conbox .ct{font-size:9px;text-transform:uppercase;letter-spacing:.1em;font-weight:900;color:var(--rose)}.conbox b{display:block;font-size:11px;margin-top:5px}.conbox p{font-size:10.5px;line-height:1.35;color:var(--muted);margin:4px 0 0}
+.inter-svg{position:absolute;inset:0;width:100%;height:100%;z-index:1}.inter-svg line{stroke:#cbd0d8;stroke-width:2}.inter-svg line.on{stroke:var(--rose);stroke-width:3}
+.inter-note{position:absolute;left:50%;top:61%;transform:translateX(-50%);font-size:11px;color:var(--muted);text-align:center;width:60%;z-index:4}
+
+
+/* V3 Tab 1: overlapping field map */
+.venn-canvas{position:relative;height:610px;margin-top:15px;border:1px solid var(--line);border-radius:20px;background:#fff;overflow:hidden;box-shadow:0 8px 28px #20232a0a}
+.venn-circle{position:absolute;border-radius:50%;border:2px solid rgba(70,75,90,.28);display:flex;align-items:center;justify-content:center;text-align:center;cursor:pointer;transition:.25s;z-index:2}
+.venn-circle:hover,.venn-circle.on{filter:saturate(1.15);box-shadow:0 0 0 5px rgba(112,92,145,.08)}
+.venn-circle .name{font-weight:900;font-size:11px;letter-spacing:.04em;text-transform:uppercase;position:absolute}
+.wgs{left:50%;top:47%;transform:translate(-50%,-50%);width:410px;height:410px;background:rgba(112,92,145,.18);border-color:rgba(112,92,145,.55);z-index:3}
+.wgs .name{font-family:Georgia,serif;font-size:23px;letter-spacing:0;text-transform:none;top:44%;left:50%;transform:translate(-50%,-50%);width:190px}
+.wgs .coreterms{position:absolute;top:55%;left:50%;transform:translateX(-50%);width:230px;font-size:10.5px;line-height:1.55;color:#55466b}
+.soc{left:50%;top:16%;transform:translate(-50%,-50%);width:245px;height:245px;background:rgba(80,118,101,.13)}
+.soc .name{top:20px}.psych{left:74%;top:31%;transform:translate(-50%,-50%);width:235px;height:235px;background:rgba(78,113,139,.13)}.psych .name{right:22px;top:37px}
+.health{left:75%;top:63%;transform:translate(-50%,-50%);width:230px;height:230px;background:rgba(177,132,56,.13)}.health .name{right:25px;bottom:35px}
+.media{left:59%;top:79%;transform:translate(-50%,-50%);width:220px;height:220px;background:rgba(164,93,109,.11)}.media .name{bottom:20px}
+.politics{left:34%;top:78%;transform:translate(-50%,-50%);width:230px;height:230px;background:rgba(116,101,71,.11)}.politics .name{bottom:22px;left:40px}
+.history{left:25%;top:59%;transform:translate(-50%,-50%);width:235px;height:235px;background:rgba(137,102,127,.11)}.history .name{left:22px;bottom:52px}
+.discOutside{position:absolute;font-size:9.5px;color:#737985;line-height:1.35;width:95px;text-align:center;z-index:4;pointer-events:none}
+.overlapTag{position:absolute;z-index:6;font-size:10px;font-weight:800;line-height:1.25;text-align:center;padding:5px 7px;border-radius:10px;background:rgba(255,255,255,.86);border:1px solid rgba(112,92,145,.2);pointer-events:none;transition:.2s}
+.venn-canvas.focus .venn-circle{opacity:.18}.venn-canvas.focus .venn-circle.on,.venn-canvas.focus .wgs{opacity:1}.venn-canvas.focus .overlapTag{opacity:.12}.venn-canvas.focus .overlapTag.show{opacity:1;box-shadow:0 3px 12px rgba(40,40,60,.12)}
+.venn-detail{position:absolute;left:50%;bottom:13px;transform:translateX(-50%);width:min(760px,76%);min-height:72px;border:1px solid #d9d3e5;border-radius:15px;background:rgba(255,255,255,.96);z-index:10;padding:10px 14px;display:grid;grid-template-columns:1.55fr 1fr;gap:16px;box-shadow:0 7px 20px #20232a12}
+.venn-detail .label{font-size:9px;text-transform:uppercase;letter-spacing:.11em;color:var(--violet);font-weight:900}.venn-detail strong{display:block;font-family:Georgia,serif;font-size:14px;margin-top:2px}.venn-detail p{font-size:10.5px;color:var(--muted);margin:3px 0 0;line-height:1.35}
+.venn-key{position:absolute;left:18px;top:18px;width:190px;font-size:10.5px;color:var(--muted);z-index:8;background:rgba(255,255,255,.88);padding:8px 10px;border-radius:11px;border:1px solid var(--line)}
+
+
+/* V4: WGS is the shared intersection, not its own circle */
+.venn4 .venn-circle{width:300px;height:300px;background:rgba(112,92,145,.095);border-color:rgba(65,70,82,.34)}
+.venn4 .soc{left:50%;top:27%}
+.venn4 .psych{left:65%;top:37%}
+.venn4 .health{left:64%;top:58%}
+.venn4 .media{left:55%;top:68%}
+.venn4 .politics{left:39%;top:66%}
+.venn4 .history{left:35%;top:43%}
+.venn4 .venn-circle .name{font-size:10.5px;color:#454b56}
+.venn4 .soc .name{top:20px;left:50%;transform:translateX(-50%)}
+.venn4 .psych .name{right:20px;top:55px}
+.venn4 .health .name{right:28px;bottom:55px}
+.venn4 .media .name{bottom:18px;left:50%;transform:translateX(-50%)}
+.venn4 .politics .name{bottom:30px;left:25px}
+.venn4 .history .name{left:20px;top:58px}
+.wgs-intersection{position:absolute;left:50%;top:49%;transform:translate(-50%,-50%);width:185px;height:145px;border-radius:48% 52% 46% 54%;background:rgba(112,92,145,.82);color:white;z-index:8;display:flex;align-items:center;justify-content:center;text-align:center;padding:18px;box-shadow:0 9px 26px rgba(70,55,100,.24);cursor:pointer}
+.wgs-intersection strong{font-family:Georgia,serif;font-size:19px;line-height:1.08}.wgs-intersection small{display:block;margin-top:7px;font-size:9px;opacity:.78;line-height:1.3}
+.venn4.focus .wgs-intersection{opacity:1}.venn4.focus .venn-circle.on{opacity:1}.venn4.focus .venn-circle:not(.on){opacity:.2}
+.venn4 .sharedTag{position:absolute;z-index:9;font-size:9.5px;font-weight:800;background:rgba(255,255,255,.9);border:1px solid #d8d1e2;border-radius:9px;padding:4px 6px;opacity:0;transition:.2s;pointer-events:none;text-align:center}
+.venn4 .sharedTag.show{opacity:1}
+
+
+/* V4.1 Tab 1 clipping fix only */
+.venn4{height:690px}
+.venn4 .soc{top:23%}
+.venn4 .psych{top:32%}
+.venn4 .health{top:49%}
+.venn4 .media{top:58%}
+.venn4 .politics{top:57%}
+.venn4 .history{top:38%}
+.venn4 .wgs-intersection{top:40%}
+.venn4 .sharedTag[data-tag="sociology"]{top:24%!important}
+.venn4 .sharedTag[data-tag="psychology"]{top:32%!important}
+.venn4 .sharedTag[data-tag="health"]{top:46%!important}
+.venn4 .sharedTag[data-tag="media"]{top:52%!important}
+.venn4 .sharedTag[data-tag="politics"]{top:51%!important}
+.venn4 .sharedTag[data-tag="history"]{top:35%!important}
+.venn4 .venn-detail{bottom:14px}
+
+
+/* V4.2 Tab 1 dynamic detail-panel clipping fix */
+.venn4{height:760px}
+.venn4 .venn-detail{
+  min-height:112px;
+  height:auto;
+  bottom:16px;
+  align-items:start;
+  overflow:visible;
+}
+.venn4 .venn-detail > div{min-width:0}
+.venn4 .venn-detail strong,
+.venn4 .venn-detail p{
+  white-space:normal;
+  overflow:visible;
+  text-overflow:clip;
+  overflow-wrap:anywhere;
+}
+
+
+/* V4.3 Tab 1 readability fix only */
+.venn4 .venn-key{
+  width:205px;
+  font-size:12px;
+  line-height:1.5;
+  color:#4d5360;
+}
+.venn4 .venn-circle .name{
+  font-size:13px;
+  line-height:1.25;
+  letter-spacing:.035em;
+  color:#2f3440;
+  font-weight:900;
+}
+.venn4 .wgs-intersection{width:205px;height:155px;padding:20px}
+.venn4 .wgs-intersection strong{
+  font-size:21px;
+  line-height:1.12;
+}
+.venn4 .wgs-intersection small{
+  margin-top:8px;
+  font-size:11px;
+  line-height:1.35;
+  opacity:.92;
+}
+.venn4 .sharedTag{
+  font-size:11.5px;
+  line-height:1.35;
+  padding:6px 8px;
+  color:#333844;
+  background:rgba(255,255,255,.96);
+}
+.venn4 .venn-detail{
+  min-height:132px;
+  padding:14px 17px;
+  gap:22px;
+}
+.venn4 .venn-detail .label{
+  font-size:11px;
+  line-height:1.3;
+}
+.venn4 .venn-detail strong{
+  font-size:16px;
+  line-height:1.35;
+  margin-top:4px;
+}
+.venn4 .venn-detail p{
+  font-size:13px;
+  line-height:1.48;
+  color:#4e5561;
+  margin-top:5px;
+}
+
+
+/* V5.2 Tab 2 dynamic detail-panel clipping fix only */
+.dbvenn{height:805px}
+.dbvenn .venn-detail{
+  min-height:165px;
+  height:auto;
+  bottom:16px;
+  align-items:start;
+  overflow:visible;
+}
+.dbvenn .venn-detail > div{min-width:0}
+.dbvenn .venn-detail strong,
+.dbvenn .venn-detail p{
+  white-space:normal;
+  overflow:visible;
+  text-overflow:clip;
+  overflow-wrap:anywhere;
+}
+
+
+/* V6 visual polish: Tabs 1–2 only; content and interactions unchanged */
+.venn4{
+  border:1px solid #ddd9e5;
+  border-radius:26px;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(112,92,145,.055) 0 18%, transparent 36%),
+    linear-gradient(180deg,#fdfcfe 0%,#faf9fc 100%);
+  box-shadow:0 14px 38px rgba(37,31,50,.07);
+}
+.venn4:before{
+  content:"";
+  position:absolute;inset:14px;
+  border:1px solid rgba(83,72,105,.06);
+  border-radius:19px;
+  pointer-events:none;
+}
+.venn4 .venn-circle{
+  border-width:1.5px;
+  border-color:rgba(63,67,79,.26);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.45);
+  backdrop-filter:blur(.2px);
+}
+.venn4 .soc{background:rgba(76,118,101,.105)}
+.venn4 .psych{background:rgba(72,108,142,.10)}
+.venn4 .health{background:rgba(175,132,59,.10)}
+.venn4 .media{background:rgba(160,91,108,.09)}
+.venn4 .politics{background:rgba(112,96,67,.09)}
+.venn4 .history{background:rgba(135,96,126,.09)}
+.venn4 .venn-circle:hover,
+.venn4 .venn-circle.on{
+  border-color:rgba(74,62,98,.5);
+  box-shadow:0 7px 22px rgba(42,36,54,.08), inset 0 0 0 1px rgba(255,255,255,.65);
+}
+.venn4 .venn-circle .name{
+  background:rgba(255,255,255,.78);
+  border:1px solid rgba(75,77,88,.10);
+  border-radius:999px;
+  padding:5px 9px;
+  box-shadow:0 2px 8px rgba(38,38,50,.04);
+}
+.venn4 .wgs-intersection{
+  background:
+    radial-gradient(circle at 35% 25%,rgba(255,255,255,.16),transparent 32%),
+    linear-gradient(145deg,rgba(102,83,135,.96),rgba(82,67,111,.96));
+  border:1px solid rgba(255,255,255,.38);
+  box-shadow:0 12px 30px rgba(70,55,100,.25), inset 0 0 0 1px rgba(255,255,255,.10);
+}
+.venn4 .wgs-intersection strong{letter-spacing:-.015em}
+.venn4 .wgs-intersection small{letter-spacing:.025em}
+.venn4 .sharedTag{
+  border-color:rgba(94,78,122,.20);
+  border-radius:12px;
+  box-shadow:0 5px 14px rgba(38,34,48,.07);
+  backdrop-filter:blur(4px);
+}
+.venn4 .sharedTag.show{
+  box-shadow:0 7px 18px rgba(57,45,78,.13);
+  border-color:rgba(94,78,122,.34);
+}
+.venn4 .venn-key{
+  border:0;
+  border-left:3px solid rgba(112,92,145,.45);
+  border-radius:4px 12px 12px 4px;
+  background:rgba(255,255,255,.78);
+  box-shadow:none;
+  padding:9px 11px;
+}
+.venn4 .venn-key strong{
+  display:block;
+  color:#383241;
+  margin-bottom:2px;
+}
+.venn4 .venn-detail{
+  border-color:rgba(101,88,124,.18);
+  border-radius:18px;
+  background:rgba(255,255,255,.95);
+  box-shadow:0 9px 25px rgba(35,31,45,.08);
+}
+.venn4 .venn-detail:before{
+  content:"";
+  position:absolute;
+  top:14px;bottom:14px;left:calc(62% - 11px);
+  width:1px;background:rgba(92,82,109,.11);
+}
+.venn4 .venn-detail .label{
+  letter-spacing:.13em;
+  color:#6a557f;
+}
+.venn4 .venn-detail strong{color:#292631}
+.venn4 .venn-detail p{color:#555a65}
+
+/* Tab 2 center gets a subtly distinct discovery-tool treatment */
+.dbvenn .db-center{
+  background:
+    radial-gradient(circle at 35% 25%,rgba(255,255,255,.18),transparent 33%),
+    linear-gradient(145deg,rgba(70,93,111,.96),rgba(55,73,89,.96));
+  box-shadow:0 12px 30px rgba(49,67,82,.24), inset 0 0 0 1px rgba(255,255,255,.10);
+}
+.dbvenn{
+  background:
+    radial-gradient(circle at 50% 40%,rgba(70,93,111,.05) 0 18%,transparent 36%),
+    linear-gradient(180deg,#fdfdfe 0%,#fafbfd 100%);
+}
+
+/* Smoother focus state while retaining the exact same behavior */
+.venn4.focus .venn-circle{transition:opacity .22s ease,border-color .22s ease,box-shadow .22s ease}
+.venn4.focus .sharedTag{transition:opacity .2s ease,box-shadow .2s ease}
+@media (prefers-reduced-motion:reduce){
+  .venn4 .venn-circle,.venn4 .sharedTag{transition:none!important}
+}
+
+
+/* V7 professional editorial/data-viz refinement — Tabs 1–2 only */
+.venn4{
+  border:1px solid #e4e1e8;
+  border-radius:18px;
+  background:#fbfbfc;
+  box-shadow:none;
+}
+.venn4:before{display:none}
+
+/* circles: precise, flat, restrained */
+.venn4 .venn-circle{
+  border:1.25px solid rgba(48,52,62,.28);
+  box-shadow:none;
+  backdrop-filter:none;
+}
+.venn4 .soc{background:rgba(70,112,94,.075)}
+.venn4 .psych{background:rgba(66,101,132,.072)}
+.venn4 .health{background:rgba(164,121,50,.072)}
+.venn4 .media{background:rgba(150,81,99,.066)}
+.venn4 .politics{background:rgba(102,88,60,.066)}
+.venn4 .history{background:rgba(125,87,117,.066)}
+.venn4 .venn-circle:hover,
+.venn4 .venn-circle.on{
+  border-color:rgba(50,43,65,.58);
+  box-shadow:none;
+  filter:none;
+}
+
+/* discipline names: typography directly on the graphic, not UI pills */
+.venn4 .venn-circle .name{
+  background:transparent;
+  border:0;
+  border-radius:0;
+  padding:0;
+  box-shadow:none;
+  font-size:12px;
+  font-weight:800;
+  letter-spacing:.085em;
+  color:#373a43;
+}
+
+/* central intersection: crisp editorial focal point */
+.venn4 .wgs-intersection{
+  width:198px;
+  height:146px;
+  border-radius:50%;
+  background:#554868;
+  border:0;
+  box-shadow:none;
+  padding:19px;
+}
+.venn4 .wgs-intersection strong{
+  font-family:Georgia,serif;
+  font-size:20px;
+  font-weight:700;
+  line-height:1.12;
+}
+.venn4 .wgs-intersection small{
+  font-size:10.5px;
+  line-height:1.35;
+  opacity:.86;
+  letter-spacing:.035em;
+}
+
+/* overlap annotations: quiet labels, no floating-card effect */
+.venn4 .sharedTag{
+  border:0;
+  border-radius:5px;
+  padding:4px 6px;
+  box-shadow:none;
+  backdrop-filter:none;
+  background:rgba(251,251,252,.88);
+  color:#343640;
+  font-size:10.5px;
+  font-weight:700;
+  line-height:1.3;
+}
+.venn4 .sharedTag.show{
+  border:0;
+  box-shadow:none;
+  background:#fff;
+  outline:1px solid rgba(85,72,104,.18);
+}
+
+/* explanatory key becomes a caption rather than a callout */
+.venn4 .venn-key{
+  width:210px;
+  border:0;
+  border-radius:0;
+  border-left:2px solid #8b8198;
+  background:transparent;
+  box-shadow:none;
+  padding:2px 0 2px 11px;
+  color:#656872;
+  font-size:11px;
+  line-height:1.45;
+}
+.venn4 .venn-key strong{
+  color:#35323a;
+  font-size:11px;
+  letter-spacing:.02em;
+  margin-bottom:3px;
+}
+
+/* bottom explanation: one clean editorial band */
+.venn4 .venn-detail{
+  width:min(790px,80%);
+  border:0;
+  border-top:1px solid #d9d6dd;
+  border-radius:0;
+  background:rgba(251,251,252,.97);
+  box-shadow:none;
+  padding:14px 3px 4px;
+}
+.venn4 .venn-detail:before{
+  top:14px;
+  bottom:4px;
+  background:#e2dfe5;
+}
+.venn4 .venn-detail .label{
+  color:#75677f;
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.14em;
+}
+.venn4 .venn-detail strong{
+  color:#29272d;
+  font-family:Georgia,serif;
+  font-size:15px;
+  font-weight:700;
+  line-height:1.35;
+}
+.venn4 .venn-detail p{
+  color:#5d6068;
+  font-size:12px;
+  line-height:1.48;
+}
+
+/* Research@UWW: same formal language, distinct neutral blue-gray */
+.dbvenn{
+  background:#fbfbfc;
+}
+.dbvenn .db-center{
+  background:#465966;
+  border:0;
+  box-shadow:none;
+}
+
+/* selected-state hierarchy without visual effects */
+.venn4.focus .venn-circle{opacity:.13}
+.venn4.focus .venn-circle.on{opacity:1}
+.venn4.focus .sharedTag{opacity:.08}
+.venn4.focus .sharedTag.show{opacity:1}
+
+
+/* V7.1 exact shared geometry for Tabs 1 + 2 */
+.venn4,
+.dbvenn{
+  height:805px !important;
+}
+.venn4 .venn-circle,
+.dbvenn .venn-circle{
+  width:300px !important;
+  height:300px !important;
+}
+.venn4 .soc,.dbvenn .soc{left:50%!important;top:23%!important;transform:translate(-50%,-50%)!important}
+.venn4 .psych,.dbvenn .psych{left:65%!important;top:32%!important;transform:translate(-50%,-50%)!important}
+.venn4 .health,.dbvenn .health{left:64%!important;top:49%!important;transform:translate(-50%,-50%)!important}
+.venn4 .media,.dbvenn .media{left:55%!important;top:58%!important;transform:translate(-50%,-50%)!important}
+.venn4 .politics,.dbvenn .politics{left:39%!important;top:57%!important;transform:translate(-50%,-50%)!important}
+.venn4 .history,.dbvenn .history{left:35%!important;top:38%!important;transform:translate(-50%,-50%)!important}
+
+.venn4 .wgs-intersection,
+.dbvenn .wgs-intersection,
+.dbvenn .db-center{
+  left:50%!important;
+  top:40%!important;
+  transform:translate(-50%,-50%)!important;
+  width:198px!important;
+  height:146px!important;
+  padding:19px!important;
+}
+
+/* exact annotation anchors */
+.venn4 .sharedTag[data-tag="sociology"],
+.dbvenn .sharedTag[data-tag="sociology"]{left:45%!important;top:24%!important}
+.venn4 .sharedTag[data-tag="psychology"],
+.dbvenn .sharedTag[data-tag="psychology"]{left:60%!important;top:32%!important}
+.venn4 .sharedTag[data-tag="health"],
+.dbvenn .sharedTag[data-tag="health"]{left:60%!important;top:46%!important}
+.venn4 .sharedTag[data-tag="media"],
+.dbvenn .sharedTag[data-tag="media"]{left:53%!important;top:52%!important}
+.venn4 .sharedTag[data-tag="politics"],
+.dbvenn .sharedTag[data-tag="politics"]{left:37%!important;top:51%!important}
+.venn4 .sharedTag[data-tag="history"],
+.dbvenn .sharedTag[data-tag="history"]{left:31%!important;top:35%!important}
+
+/* exact caption + lower-band geometry */
+.venn4 .venn-key,.dbvenn .venn-key{
+  left:18px!important;
+  top:18px!important;
+  width:210px!important;
+}
+.venn4 .venn-detail,.dbvenn .venn-detail{
+  left:50%!important;
+  bottom:16px!important;
+  transform:translateX(-50%)!important;
+  width:min(790px,80%)!important;
+  min-height:165px!important;
+  height:auto!important;
+}
+
+
+/* V7.2 hero visualization layout — Tabs 1 + 2 only */
+.venn4,.dbvenn{
+  height:920px!important;
+  max-width:980px;
+  margin:22px auto 0!important;
+  overflow:visible!important;
+}
+
+/* Move the complete matched Venn upward/center and keep every circle above the information band */
+.venn4 .soc,.dbvenn .soc{left:50%!important;top:22%!important}
+.venn4 .psych,.dbvenn .psych{left:66%!important;top:31%!important}
+.venn4 .health,.dbvenn .health{left:65%!important;top:48%!important}
+.venn4 .media,.dbvenn .media{left:55%!important;top:57%!important}
+.venn4 .politics,.dbvenn .politics{left:39%!important;top:56%!important}
+.venn4 .history,.dbvenn .history{left:34%!important;top:37%!important}
+
+.venn4 .wgs-intersection,
+.dbvenn .wgs-intersection,
+.dbvenn .db-center{
+  left:50%!important;
+  top:39%!important;
+}
+
+/* matched annotation anchors for the recentered hero */
+.venn4 .sharedTag[data-tag="sociology"],
+.dbvenn .sharedTag[data-tag="sociology"]{left:45%!important;top:23%!important}
+.venn4 .sharedTag[data-tag="psychology"],
+.dbvenn .sharedTag[data-tag="psychology"]{left:61%!important;top:31%!important}
+.venn4 .sharedTag[data-tag="health"],
+.dbvenn .sharedTag[data-tag="health"]{left:61%!important;top:45%!important}
+.venn4 .sharedTag[data-tag="media"],
+.dbvenn .sharedTag[data-tag="media"]{left:53%!important;top:51%!important}
+.venn4 .sharedTag[data-tag="politics"],
+.dbvenn .sharedTag[data-tag="politics"]{left:37%!important;top:50%!important}
+.venn4 .sharedTag[data-tag="history"],
+.dbvenn .sharedTag[data-tag="history"]{left:30%!important;top:34%!important}
+
+/* Caption stays secondary, tucked to the upper-left edge */
+.venn4 .venn-key,.dbvenn .venn-key{
+  left:24px!important;
+  top:24px!important;
+}
+
+/* Information is now clearly below the visualization, never on top of the circles */
+.venn4 .venn-detail,.dbvenn .venn-detail{
+  bottom:18px!important;
+  width:min(820px,84%)!important;
+  min-height:155px!important;
+  padding-top:16px!important;
+}
+
+/* Reserve a clean visual field above the lower band */
+.venn4 .venn-detail:after,.dbvenn .venn-detail:after{
+  content:"";
+  position:absolute;
+  left:0;right:0;top:-22px;
+  border-top:1px solid rgba(80,76,88,.06);
+}
+
+/* Make the stage headings visually subordinate to the hero diagram */
+.stagehead{
+  max-width:980px;
+  margin-left:auto;
+  margin-right:auto;
+}
+.stagehead h2{font-size:clamp(25px,3vw,34px)}
+.stagehead p{max-width:720px}
+
+
+/* V7.3 architectural clipping fix — Tabs 1 + 2 only */
+.venn4,
+.dbvenn{
+  /* Dedicated visualization stage. The circles retain their existing V7.2
+     coordinates and sizes; this simply gives them enough canvas. */
+  height:760px!important;
+  min-height:760px!important;
+  max-width:980px!important;
+  margin:22px auto 0!important;
+  overflow:visible!important;
+  position:relative!important;
+}
+
+/* Detail panel is no longer an overlay. It follows the visualization
+   in normal document flow, below the complete Venn field. */
+.venn4 .venn-detail,
+.dbvenn .venn-detail{
+  position:absolute!important;
+  left:50%!important;
+  top:790px!important;
+  bottom:auto!important;
+  transform:translateX(-50%)!important;
+  width:min(820px,84%)!important;
+  min-height:155px!important;
+  height:auto!important;
+  overflow:visible!important;
+  box-sizing:border-box!important;
+}
+
+/* Make the parent stage grow to include the below-visualization detail block.
+   This creates generous whitespace between the lowest circles and the text. */
+.stage:has(> .venn4),
+.stage:has(> .dbvenn){
+  padding-bottom:220px!important;
+}
+
+/* Exact shared geometry — intentionally repeated here as the final authority.
+   These are the V7.2 coordinates; neither diagram is moved or shrunk. */
+.venn4 .venn-circle,
+.dbvenn .venn-circle{
+  width:300px!important;
+  height:300px!important;
+}
+.venn4 .soc,.dbvenn .soc{left:50%!important;top:22%!important;transform:translate(-50%,-50%)!important}
+.venn4 .psych,.dbvenn .psych{left:66%!important;top:31%!important;transform:translate(-50%,-50%)!important}
+.venn4 .health,.dbvenn .health{left:65%!important;top:48%!important;transform:translate(-50%,-50%)!important}
+.venn4 .media,.dbvenn .media{left:55%!important;top:57%!important;transform:translate(-50%,-50%)!important}
+.venn4 .politics,.dbvenn .politics{left:39%!important;top:56%!important;transform:translate(-50%,-50%)!important}
+.venn4 .history,.dbvenn .history{left:34%!important;top:37%!important;transform:translate(-50%,-50%)!important}
+.venn4 .wgs-intersection,
+.dbvenn .wgs-intersection,
+.dbvenn .db-center{
+  left:50%!important;
+  top:39%!important;
+  transform:translate(-50%,-50%)!important;
+  width:198px!important;
+  height:146px!important;
+  padding:19px!important;
+}
+
+/* Remove the old decorative separator that depended on overlay placement. */
+.venn4 .venn-detail:after,
+.dbvenn .venn-detail:after{display:none!important}
+
+
+/* V7.3 normal-flow detail panels (final override) */
+#vennDetail,#dbVennDetail{
+  position:relative!important;
+  left:auto!important;
+  top:auto!important;
+  bottom:auto!important;
+  transform:none!important;
+  width:min(820px,84%)!important;
+  min-height:155px!important;
+  height:auto!important;
+  margin:42px auto 0!important;
+  overflow:visible!important;
+  box-sizing:border-box!important;
+  display:grid!important;
+  grid-template-columns:1.55fr 1fr!important;
+  gap:22px!important;
+  border:0!important;
+  border-top:1px solid #d9d6dd!important;
+  background:#fbfbfc!important;
+  padding:16px 3px 4px!important;
+}
+#vennDetail:before,#dbVennDetail:before{
+  content:""!important;
+  position:absolute!important;
+  top:16px!important;
+  bottom:4px!important;
+  left:calc(62% - 11px)!important;
+  width:1px!important;
+  background:#e2dfe5!important;
+}
+#vennDetail .label,#dbVennDetail .label{
+  color:#75677f;font-size:10px;font-weight:800;letter-spacing:.14em
+}
+#vennDetail strong,#dbVennDetail strong{
+  display:block;color:#29272d;font-family:Georgia,serif;font-size:15px;
+  font-weight:700;line-height:1.35;margin-top:4px;white-space:normal;
+  overflow:visible;text-overflow:clip;overflow-wrap:anywhere
+}
+#vennDetail p,#dbVennDetail p{
+  color:#5d6068;font-size:12px;line-height:1.48;margin-top:5px;
+  white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere
+}
+/* Details are now genuinely in flow, so no compensating stage padding is needed. */
+.stage:has(> .venn4),.stage:has(> .dbvenn){padding-bottom:28px!important}
+
+
+/* New Tab 3 uses the identical Venn geometry and normal-flow detail treatment */
+#evidenceVennDetail{
+  position:relative!important;left:auto!important;top:auto!important;bottom:auto!important;
+  transform:none!important;width:min(820px,84%)!important;min-height:155px!important;height:auto!important;
+  margin:42px auto 0!important;overflow:visible!important;box-sizing:border-box!important;
+  display:grid!important;grid-template-columns:1.55fr 1fr!important;gap:22px!important;
+  border:0!important;border-top:1px solid #d9d6dd!important;background:#fbfbfc!important;padding:16px 3px 4px!important
+}
+#evidenceVennDetail:before{
+  content:""!important;position:absolute!important;top:16px!important;bottom:4px!important;
+  left:calc(62% - 11px)!important;width:1px!important;background:#e2dfe5!important
+}
+#evidenceVennDetail .label{color:#75677f;font-size:10px;font-weight:800;letter-spacing:.14em}
+#evidenceVennDetail strong{display:block;color:#29272d;font-family:Georgia,serif;font-size:15px;font-weight:700;line-height:1.35;margin-top:4px;white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere}
+#evidenceVennDetail p{color:#5d6068;font-size:12px;line-height:1.48;margin-top:5px;white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere}
+
+
+/* V8.1 surgical annotation placement only.
+   Circle geometry, centers, content, interactions, and later tabs are untouched. */
+
+/* TAB 1 — disciplinary research-direction annotations */
+#vennCanvas .sharedTag[data-tag="sociology"]{left:50%!important;top:8%!important}
+#vennCanvas .sharedTag[data-tag="psychology"]{left:78%!important;top:23%!important}
+#vennCanvas .sharedTag[data-tag="health"]{left:79%!important;top:51%!important}
+#vennCanvas .sharedTag[data-tag="media"]{left:58%!important;top:70%!important}
+#vennCanvas .sharedTag[data-tag="politics"]{left:28%!important;top:68%!important}
+#vennCanvas .sharedTag[data-tag="history"]{left:21%!important;top:37%!important}
+
+/* TAB 2 — discipline-specific database annotations */
+#dbVennCanvas .sharedTag[data-tag="sociology"]{left:50%!important;top:8%!important}
+#dbVennCanvas .sharedTag[data-tag="psychology"]{left:78%!important;top:23%!important}
+#dbVennCanvas .sharedTag[data-tag="health"]{left:79%!important;top:51%!important}
+#dbVennCanvas .sharedTag[data-tag="media"]{left:58%!important;top:70%!important}
+#dbVennCanvas .sharedTag[data-tag="politics"]{left:28%!important;top:68%!important}
+#dbVennCanvas .sharedTag[data-tag="history"]{left:21%!important;top:37%!important}
+
+/* TAB 3 — discipline-specific evidence annotations */
+#evidenceVennCanvas .sharedTag[data-tag="sociology"]{left:50%!important;top:8%!important}
+#evidenceVennCanvas .sharedTag[data-tag="psychology"]{left:78%!important;top:23%!important}
+#evidenceVennCanvas .sharedTag[data-tag="health"]{left:79%!important;top:51%!important}
+#evidenceVennCanvas .sharedTag[data-tag="media"]{left:58%!important;top:70%!important}
+#evidenceVennCanvas .sharedTag[data-tag="politics"]{left:28%!important;top:68%!important}
+#evidenceVennCanvas .sharedTag[data-tag="history"]{left:21%!important;top:37%!important}
+
+/* Keep the annotation compact and visually subordinate to its discipline name. */
+#vennCanvas .sharedTag,
+#dbVennCanvas .sharedTag,
+#evidenceVennCanvas .sharedTag{
+  max-width:185px!important;
+  text-align:center!important;
+}
+
+
+/* V8.2 Tab 2 live database links only */
+#dbVennCanvas a{color:inherit;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:2px}
+#dbVennCanvas a:hover,#dbVennCanvas a:focus{text-decoration-thickness:2px}
+#dbVennCanvas .db-center a{color:#fff}
+#dbVennCanvas .center-secondary{display:block;margin-top:8px;font-size:11px;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;font-weight:700;line-height:1.2}
+
+
+/* V8.3 Tab 2 link hit-area fix only */
+#dbVennCanvas .sharedTag.show{
+  pointer-events:auto!important;
+  z-index:30!important;
+}
+#dbVennCanvas .sharedTag.show a{
+  pointer-events:auto!important;
+  position:relative!important;
+  z-index:31!important;
+  cursor:pointer!important;
+}
+#dbVennCanvas .db-center{
+  z-index:30!important;
+  pointer-events:auto!important;
+}
+#dbVennCanvas .db-center a{
+  position:relative!important;
+  z-index:31!important;
+  pointer-events:auto!important;
+  cursor:pointer!important;
+}
+
+/* V8.4 surgical annotation/name separation — coordinates only */
+#vennCanvas .sharedTag[data-tag="sociology"]{left:50%!important;top:15%!important}
+#vennCanvas .sharedTag[data-tag="psychology"]{left:72%!important;top:28%!important}
+#vennCanvas .sharedTag[data-tag="health"]{left:73%!important;top:47%!important}
+#vennCanvas .sharedTag[data-tag="media"]{left:55%!important;top:64%!important}
+#vennCanvas .sharedTag[data-tag="politics"]{left:34%!important;top:62%!important}
+#vennCanvas .sharedTag[data-tag="history"]{left:27%!important;top:39%!important}
+#dbVennCanvas .sharedTag[data-tag="sociology"]{left:50%!important;top:15%!important}
+#dbVennCanvas .sharedTag[data-tag="psychology"]{left:72%!important;top:28%!important}
+#dbVennCanvas .sharedTag[data-tag="health"]{left:73%!important;top:47%!important}
+#dbVennCanvas .sharedTag[data-tag="media"]{left:55%!important;top:64%!important}
+#dbVennCanvas .sharedTag[data-tag="politics"]{left:34%!important;top:62%!important}
+#dbVennCanvas .sharedTag[data-tag="history"]{left:27%!important;top:39%!important}
+#evidenceVennCanvas .sharedTag[data-tag="sociology"]{left:50%!important;top:15%!important}
+#evidenceVennCanvas .sharedTag[data-tag="psychology"]{left:72%!important;top:28%!important}
+#evidenceVennCanvas .sharedTag[data-tag="health"]{left:73%!important;top:47%!important}
+#evidenceVennCanvas .sharedTag[data-tag="media"]{left:55%!important;top:64%!important}
+#evidenceVennCanvas .sharedTag[data-tag="politics"]{left:34%!important;top:62%!important}
+#evidenceVennCanvas .sharedTag[data-tag="history"]{left:27%!important;top:39%!important}
+
+/* V9.1 surgical replacement: Same search, different results. Existing Venn rules are untouched. */
+#resultsVennCanvas .sharedTag[data-tag="sociology"]{left:50%!important;top:13%!important}
+#resultsVennCanvas .sharedTag[data-tag="psychology"]{left:76%!important;top:27%!important}
+#resultsVennCanvas .sharedTag[data-tag="health"]{left:76%!important;top:50%!important}
+#resultsVennCanvas .sharedTag[data-tag="media"]{left:55%!important;top:67%!important}
+#resultsVennCanvas .sharedTag[data-tag="politics"]{left:31%!important;top:65%!important}
+#resultsVennCanvas .sharedTag[data-tag="history"]{left:24%!important;top:39%!important}
+#resultsVennCanvas .resultTag{width:190px!important;max-width:190px!important;text-align:left!important;padding:9px 10px!important;line-height:1.18!important}
+#resultsVennCanvas .resultTag b{display:block;font-size:10.5px;letter-spacing:.02em;margin-top:6px;color:#373a43}
+#resultsVennCanvas .resultTag b:first-child{margin-top:0}
+#resultsVennCanvas .resultTag span{display:block;font-size:10px;font-weight:500;margin-top:1px;color:#555963}
+#resultsVennCanvas .results-center strong{font-family:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace;font-size:14px;letter-spacing:0;line-height:1.42}
+#resultsVennCanvas .search-label{display:block;font-size:9px;font-weight:800;letter-spacing:.14em;margin-bottom:7px;opacity:.72}
+#resultsVennDetail code{font-size:.95em}
+
+/* V9.2 surgical Tab 3 detail-panel flow fix only */
+#resultsVennCanvas{
+  height:760px!important;
+  min-height:760px!important;
+  margin-bottom:24px!important;
+  overflow:visible!important;
+  position:relative!important;
+}
+#resultsVennDetail{
+  position:relative!important;
+  inset:auto!important;
+  top:auto!important;
+  right:auto!important;
+  bottom:auto!important;
+  left:auto!important;
+  transform:none!important;
+  margin:0 auto!important;
+  clear:both!important;
+  width:auto!important;
+  max-width:none!important;
+}
+
+/* Tab 4 only: same layer hierarchy as the working Tabs 1–3 bubbles */
+#dbVennCanvas .venn-circle{z-index:2!important}
+#dbVennCanvas .db-center{z-index:8!important}
+#dbVennCanvas .sharedTag{z-index:9!important}
+#dbVennCanvas .sharedTag.show{
+  z-index:9!important;
+  pointer-events:auto!important;
+}
+#dbVennCanvas .sharedTag.show a{
+  position:relative!important;
+  z-index:10!important;
+  pointer-events:auto!important;
+  cursor:pointer!important;
+}
+
+
+/* Per-tab reset control */
+.stagehead{position:relative}
+.tab-reset{
+  position:static;
+  display:block;
+  width:max-content;
+  margin:10px 0 0 auto;
+  border:1px solid #cfd3dc;
+  border-radius:999px;
+  background:#fff;
+  color:#4d5360;
+  padding:7px 12px;
+  font:700 11px/1 Inter,system-ui,-apple-system,Segoe UI,sans-serif;
+  letter-spacing:.02em;
+  cursor:pointer;
+}
+.tab-reset:hover,.tab-reset:focus{
+  border-color:#8d829d;
+  color:#352c42;
+}
+
+
+/* Tab 2 caregiving case — question labels only */
+#careVennCanvas .sharedTag{max-width:220px!important;text-align:center!important}
+#careVennCanvas .sharedTag[data-tag="sociology"]{left:50%!important;top:15%!important}
+#careVennCanvas .sharedTag[data-tag="psychology"]{left:72%!important;top:28%!important}
+#careVennCanvas .sharedTag[data-tag="health"]{left:73%!important;top:47%!important}
+#careVennCanvas .sharedTag[data-tag="media"]{left:55%!important;top:64%!important}
+#careVennCanvas .sharedTag[data-tag="politics"]{left:34%!important;top:62%!important}
+#careVennCanvas .sharedTag[data-tag="history"]{left:27%!important;top:39%!important}
+#careVennCanvas .wgs-intersection strong{font-size:14px!important;line-height:1.3!important}
+
+
+/* Tab 5 activity prompt only */
+#activityVennCanvas .activity-question{width:260px!important;height:180px!important;padding:22px!important;cursor:default!important}
+#activityVennCanvas .activity-question strong{font-size:15px!important;line-height:1.35!important}
+#activityVennCanvas .venn-circle{cursor:default!important}
+
+
+/* Tab 4 keyword-development lesson only */
+.keyword-canvas{max-width:980px;margin:22px auto 0;min-height:700px;border:1px solid #e4e1e8;border-radius:18px;background:#fbfbfc;padding:34px 46px 38px;display:flex;flex-direction:column;align-items:center;text-align:center}
+.keyword-question{width:min(700px,90%);padding:20px 26px;border-bottom:1px solid #d9d6dd}
+.keyword-question strong{display:block;margin-top:7px;font-family:Georgia,serif;font-size:24px;line-height:1.3;color:#29272d}
+.keyword-step{display:block;color:#75677f;font-size:10px;font-weight:800;letter-spacing:.14em}
+.keyword-arrow{font-size:25px;color:#8b8198;margin:11px 0 8px}
+.keyword-instruction{margin:0 0 14px}.keyword-instruction strong{display:block;font-size:15px;color:#29272d}.keyword-instruction span{display:block;margin-top:4px;font-size:12px;color:#5d6068}
+.keyword-concepts{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+.keyword-chip{border:1px solid #cfc9d7;border-radius:999px;background:#fff;padding:10px 17px;font-size:14px;font-weight:800;cursor:pointer}
+.keyword-chip:hover,.keyword-chip:focus,.keyword-chip.on{border-color:#705c91;background:#f3eff7}.keyword-chip:focus-visible{outline:3px solid #705c91;outline-offset:3px}
+.keyword-alternatives{width:min(650px,88%);min-height:105px;margin:18px 0 22px;padding:15px 18px;border-left:2px solid #8b8198;background:#fff;text-align:left}
+.keyword-alternatives strong{display:block;margin-top:5px;font-family:Georgia,serif;font-size:17px}.keyword-alternatives p{margin:5px 0 0;font-size:12px;line-height:1.45;color:#5d6068}
+.keyword-connect{margin-top:0}
+.keyword-search{width:min(720px,92%);padding:18px 22px;background:#554868;color:#fff;border-radius:50%;margin:2px 0 20px}
+.keyword-search code{font-family:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace;font-size:16px;line-height:1.45}
+.keyword-revise{width:min(720px,92%);border-top:1px solid #d9d6dd;padding-top:15px;text-align:left}
+.keyword-revise strong{display:block;margin-top:5px;font-family:Georgia,serif;font-size:16px}.keyword-revise p{margin:5px 0 0;color:#5d6068;font-size:12px;line-height:1.45}
+@media(max-width:700px){.keyword-canvas{padding:26px 18px 32px}.keyword-question strong{font-size:20px}.keyword-concepts{flex-direction:column;width:100%}.keyword-chip{width:100%}}
+
+
+/* Tab 4: disciplinary keyword Venn */
+#disciplineKeywordVenn .discipline-keyword-center{
+  width:260px;
+  height:180px;
+}
+#disciplineKeywordVenn .discipline-keyword-center strong{
+  font-size:15px;
+  line-height:1.35;
+}
+
+
+.your-turn-steps{
+  margin:10px 0 0 1.25rem;
+  padding:0;
+  columns:2;
+  column-gap:34px;
+}
+.your-turn-steps li{
+  margin:0 0 8px;
+  break-inside:avoid;
+  line-height:1.4;
+}
+@media (max-width:760px){
+  .your-turn-steps{columns:1;}
+}
+
+
+.your-turn-reflection{
+  margin:18px auto 0;
+  max-width:980px;
+  padding:16px 20px;
+  border:1px solid rgba(93,74,111,.22);
+  border-radius:16px;
+  background:rgba(255,255,255,.72);
+}
+.your-turn-reflection h3{margin:0 0 10px;font-size:17px}
+.your-turn-reflection ol{margin:0;padding-left:1.35rem;columns:2;column-gap:34px}
+.your-turn-reflection li{margin:0 0 10px;padding-left:4px;break-inside:avoid;line-height:1.42}
+@media(max-width:760px){.your-turn-reflection ol{columns:1}}
+
+
+/* Feminist information-literacy vocabulary tab */
+.feminist-vocab-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:18px}
+.feminist-vocab-card{padding:16px 18px;border:1px solid rgba(93,74,111,.22);border-radius:16px;background:rgba(255,255,255,.78);break-inside:avoid}
+.feminist-vocab-card h3{margin:0 0 7px;font-size:18px}
+.feminist-vocab-card p{margin:0 0 8px;line-height:1.42}
+.feminist-vocab-card .vocab-prompt{margin:10px 0 0;font-size:13px}
+@media(max-width:900px){.feminist-vocab-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){.feminist-vocab-grid{grid-template-columns:1fr}}
+
+
+.feminist-lens-intro{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+  margin:16px 0 10px;
+}
+.feminist-lens-intro>div{
+  padding:14px 16px;
+  border:1px solid rgba(93,74,111,.22);
+  border-radius:14px;
+  background:rgba(255,255,255,.68);
+}
+.feminist-lens-intro strong{
+  display:block;
+  margin-bottom:6px;
+  font-size:13px;
+  letter-spacing:.05em;
+}
+.feminist-lens-intro span{display:block;line-height:1.42}
+.feminist-lens-bridge{margin:10px 0 0;font-weight:700}
+@media(max-width:700px){.feminist-lens-intro{grid-template-columns:1fr}}
+
+
+/* Concise feminist-lens checkpoint */
+.feminist-lens-notice{margin-top:16px}
+.feminist-lens-notice h3{margin:0 0 10px;font-size:17px}
+.feminist-notice-grid{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:10px;
+}
+.feminist-notice-grid>div{
+  padding:12px 10px;
+  border:1px solid rgba(93,74,111,.22);
+  border-radius:12px;
+  background:rgba(255,255,255,.72);
+}
+.feminist-notice-grid strong{display:block;margin-bottom:4px}
+.feminist-notice-grid span{display:block;font-size:13px;line-height:1.3}
+@media(max-width:900px){.feminist-notice-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){.feminist-notice-grid{grid-template-columns:1fr}}
+
+
+/* Visual feminist-lens flow */
+.lens-flow{
+  display:grid;
+  grid-template-columns:minmax(190px,1fr) 34px minmax(330px,1.45fr) 34px minmax(190px,1fr);
+  align-items:center;
+  gap:10px;
+  margin-top:20px;
+}
+.lens-kicker{
+  font-size:12px;
+  font-weight:800;
+  letter-spacing:.08em;
+  text-align:center;
+  margin-bottom:10px;
+}
+.topic-cloud{
+  min-height:260px;
+  border:2px solid rgba(93,74,111,.22);
+  border-radius:50%;
+  background:rgba(255,255,255,.72);
+  display:flex;
+  flex-wrap:wrap;
+  align-content:center;
+  justify-content:center;
+  gap:9px;
+  padding:28px 22px;
+}
+.topic-cloud span{
+  padding:7px 10px;
+  border-radius:999px;
+  background:rgba(93,74,111,.09);
+  font-weight:700;
+  font-size:14px;
+}
+.lens-arrow{
+  text-align:center;
+  font-size:30px;
+  font-weight:800;
+  opacity:.55;
+}
+.lens-graphic{
+  position:relative;
+  width:310px;
+  height:310px;
+  margin:0 auto 28px;
+}
+.lens-ring{
+  width:100%;
+  height:100%;
+  border:10px solid rgba(93,74,111,.30);
+  border-radius:50%;
+  background:rgba(255,255,255,.66);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  padding:34px;
+  box-sizing:border-box;
+}
+.lens-handle{
+  position:absolute;
+  width:92px;
+  height:18px;
+  border-radius:12px;
+  background:rgba(93,74,111,.30);
+  right:-58px;
+  bottom:17px;
+  transform:rotate(45deg);
+  transform-origin:left center;
+}
+.lens-term{
+  width:100%;
+  border:0;
+  background:transparent;
+  border-radius:10px;
+  padding:5px 8px;
+  cursor:pointer;
+  text-align:center;
+  font:inherit;
+}
+.lens-term strong{display:block;font-size:14px}
+.lens-term span{display:block;font-size:11.5px;line-height:1.2;margin-top:1px}
+.lens-term:hover,.lens-term:focus-visible,.lens-term.active{
+  background:rgba(93,74,111,.12);
+  outline:none;
+}
+.lens-term:focus-visible{box-shadow:0 0 0 3px rgba(93,74,111,.22)}
+.lens-output{
+  min-height:260px;
+  border:2px solid rgba(93,74,111,.22);
+  border-radius:22px;
+  background:rgba(255,255,255,.72);
+  padding:26px 18px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+.notice-words{
+  display:flex;
+  flex-direction:column;
+  gap:9px;
+  text-align:center;
+}
+.notice-words strong{
+  font-size:22px;
+  letter-spacing:.04em;
+}
+.lens-output p{
+  margin:18px 0 0;
+  font-size:13px;
+  line-height:1.35;
+  text-align:center;
+}
+@media(max-width:980px){
+  .lens-flow{grid-template-columns:1fr;gap:12px}
+  .lens-arrow{transform:rotate(90deg);font-size:24px}
+  .topic-cloud,.lens-output{min-height:unset}
+}
+@media(max-width:430px){
+  .lens-graphic{width:280px;height:280px}
+  .lens-ring{padding:28px}
+}
+
+
+/* Power frames the feminist lens rather than becoming a sixth lens item */
+.power-frame{
+  position:relative;
+  width:350px;
+  margin:0 auto;
+  padding:34px 18px 8px;
+  border:2px dashed rgba(93,74,111,.34);
+  border-radius:48%;
+  box-sizing:border-box;
+}
+.power-label{
+  position:absolute;
+  top:-12px;
+  left:50%;
+  transform:translateX(-50%);
+  padding:3px 12px;
+  border-radius:999px;
+  background:var(--paper, #fff);
+  font-size:13px;
+  font-weight:900;
+  letter-spacing:.12em;
+}
+.power-caption{
+  position:absolute;
+  top:10px;
+  left:0;
+  right:0;
+  text-align:center;
+  font-size:11px;
+  font-weight:700;
+  opacity:.72;
+}
+.power-frame .lens-graphic{margin-left:auto;margin-right:auto}
+@media(max-width:430px){
+  .power-frame{width:310px;padding-left:10px;padding-right:10px}
+}
+
+</style>
+</head><body>
+<div class="shell">
+<header>
+<div><div class="kicker">CORE 130 · Women’s & Gender Studies</div></div>
+<nav class="progress">
+<button class="on" onclick="go(0)">1 · Follow the question</button>
+<button onclick="go(1)">2 · One question, six lenses</button>
+<button onclick="go(2)">3 · Build the search</button>
+<button onclick="go(3)">4 · Keywords by discipline</button>
+<button onclick="go(4)">5 · Same search, different results</button>
+<button onclick="go(5)">6 · Where to search</button>
+<button onclick="go(6)">7 · A feminist research lens</button>
+<button onclick="go(7)">8 · Your turn</button>
+
+
+</nav>
+</header>
+<main>
+<section class="stage on">
+<div class="stagehead"><div><h2>Where could your research question lead?</h2><p>A Women’s &amp; Gender Studies question can open into different areas of inquiry. Explore the overlaps to see how the same topic can become a question about institutions, identity, health, representation, policy, or history.</p></div><button class="next" onclick="go(1)">Explore evidence →</button><button class="tab-reset" type="button" onclick="resetAtlasTab(0)">Reset</button></div>
+<div class="venn-canvas venn4" id="vennCanvas">
+<div class="venn-circle soc" data-field="sociology" onclick="venn4Focus('sociology',this)"><span class="name">Sociology</span></div>
+<div class="venn-circle psych" data-field="psychology" onclick="venn4Focus('psychology',this)"><span class="name">Psychology</span></div>
+<div class="venn-circle health" data-field="health" onclick="venn4Focus('health',this)"><span class="name">Health</span></div>
+<div class="venn-circle media" data-field="media" onclick="venn4Focus('media',this)"><span class="name">Media Studies</span></div>
+<div class="venn-circle politics" data-field="politics" onclick="venn4Focus('politics',this)"><span class="name">Political Science</span></div>
+<div class="venn-circle history" data-field="history" onclick="venn4Focus('history',this)"><span class="name">History / Humanities</span></div>
+
+<div class="wgs-intersection" onclick="venn4Focus('wgs',this)">
+<div><strong>Women’s &amp;<br>Gender Studies</strong></div>
+</div>
+
+<div class="sharedTag" data-tag="sociology" style="left:47%;top:32%">structures · institutions<br>inequality · work</div>
+<div class="sharedTag" data-tag="psychology" style="left:60%;top:40%">identity · stereotypes<br>embodiment</div>
+<div class="sharedTag" data-tag="health" style="left:60%;top:57%">health disparities<br>medical authority</div>
+<div class="sharedTag" data-tag="media" style="left:53%;top:63%">representation<br>discourse</div>
+<div class="sharedTag" data-tag="politics" style="left:39%;top:60%">rights · policy<br>power</div>
+<div class="sharedTag" data-tag="history" style="left:35%;top:43%">gender across time<br>archival silences</div>
+
+
+</div></section>
+
+<section class="stage">
+<div class="stagehead"><div><h2>How does the question change when the discipline changes?</h2><p>Start with one question. Click a discipline to see how a researcher in that field might reframe it.</p></div><button class="next" onclick="go(2)">Build the search →</button><button class="tab-reset" type="button" onclick="resetAtlasTab(1)">Reset</button></div>
+<div class="venn-canvas venn4" id="careVennCanvas">
+  <div class="venn-circle soc" data-field="sociology" onclick="careFocus('sociology',this)"><span class="name">Sociology</span></div>
+  <div class="venn-circle psych" data-field="psychology" onclick="careFocus('psychology',this)"><span class="name">Psychology</span></div>
+  <div class="venn-circle health" data-field="health" onclick="careFocus('health',this)"><span class="name">Health</span></div>
+  <div class="venn-circle media" data-field="media" onclick="careFocus('media',this)"><span class="name">Media Studies</span></div>
+  <div class="venn-circle politics" data-field="politics" onclick="careFocus('politics',this)"><span class="name">Political Science</span></div>
+  <div class="venn-circle history" data-field="history" onclick="careFocus('history',this)"><span class="name">History / Humanities</span></div>
+
+  <div class="wgs-intersection" onclick="careFocus('center',this)">
+    <div><strong>RESEARCH QUESTION</strong><br>How does income inequality affect women in the workplace?<small></small></div>
+  </div>
+
+  <div class="sharedTag" data-tag="sociology">How do workplace structures, family roles, and gender norms distribute unpaid caregiving?</div>
+  <div class="sharedTag" data-tag="psychology">How do gender-role expectations shape who feels responsible for caregiving?</div>
+  <div class="sharedTag" data-tag="health">How does unpaid caregiving affect caregivers’ physical and mental health?</div>
+  <div class="sharedTag" data-tag="media">How do media representations reinforce or challenge the idea that caregiving is women’s work?</div>
+  <div class="sharedTag" data-tag="politics">How do family-leave, childcare, and social-welfare policies affect who performs unpaid care?</div>
+  <div class="sharedTag" data-tag="history">How have expectations about women’s responsibility for unpaid care changed over time?</div>
+
+  <div class="venn-key"><strong>Try two different circles.</strong>The topic stays the same, but the research question changes with the disciplinary lens.</div>
+</div>
+</section>
+
+<section class="stage">
+<div class="stagehead"><div><h2>Build the search</h2><p>Databases work better when you search the main ideas in a question rather than typing the whole question. Break the question into concepts, then connect and revise them.</p></div><button class="next" onclick="go(3)">Keywords by discipline →</button><button class="tab-reset" type="button" onclick="resetAtlasTab(2)">Reset</button></div>
+<div class="keyword-canvas" id="keywordCanvas">
+  <div class="keyword-question"><span class="keyword-step">RESEARCH QUESTION</span><strong>How does income inequality affect women in the workplace?</strong></div>
+  <div class="keyword-arrow" aria-hidden="true">↓</div>
+  <div class="keyword-instruction"><strong>1 · Pull out the main concepts.</strong><span>Click a concept to see other words a researcher might use.</span></div>
+  <div class="keyword-concepts" role="group" aria-label="Main concepts from the research question">
+    <button type="button" class="keyword-chip" onclick="keywordFocus('women',this)">women</button>
+    <button type="button" class="keyword-chip" onclick="keywordFocus('income',this)">income inequality</button>
+    <button type="button" class="keyword-chip" onclick="keywordFocus('workplace',this)">workplace</button>
+  </div>
+  <div class="keyword-alternatives" id="keywordAlternatives" aria-live="polite"><span class="keyword-step">TRY OTHER LANGUAGE</span><strong>Select a concept above.</strong><p>Your first words are a starting point. Searching often teaches you new vocabulary.</p></div>
+  <div class="keyword-instruction keyword-connect"><strong>2 · Connect the concepts.</strong><span>Use <b>AND</b> between different ideas, <b>OR</b> between alternatives, and quotation marks around phrases.</span></div>
+  <div class="keyword-search" aria-label="Example database search"><code>women AND "income inequality" AND workplace</code></div>
+  <div class="keyword-revise"><span class="keyword-step">THEN REVISE</span><strong>Your first search is not your finished search.</strong><p>Try synonyms, add or remove a concept, and notice the vocabulary researchers in different disciplines use.</p></div>
+</div>
+</section>
+
+<section class="stage">
+<div class="stagehead"><div><h2>How might the keywords change with the discipline?</h2><p>The question stays the same, but different fields may use different language to describe the problem. Explore the circles to see useful vocabulary for each disciplinary lens.</p></div><button class="next" onclick="go(4)">Same search, different results →</button><button class="tab-reset" type="button" onclick="resetAtlasTab(3)">Reset</button></div>
+<div class="venn-canvas venn4 discipline-keyword-venn" id="disciplineKeywordVenn">
+  <div class="venn-circle soc" data-field="sociology" onclick="disciplineKeywordFocus('sociology',this)"><span class="name">Sociology</span></div>
+  <div class="venn-circle psych" data-field="psychology" onclick="disciplineKeywordFocus('psychology',this)"><span class="name">Psychology</span></div>
+  <div class="venn-circle health" data-field="health" onclick="disciplineKeywordFocus('health',this)"><span class="name">Health</span></div>
+  <div class="venn-circle media" data-field="media" onclick="disciplineKeywordFocus('media',this)"><span class="name">Media Studies</span></div>
+  <div class="venn-circle politics" data-field="politics" onclick="disciplineKeywordFocus('politics',this)"><span class="name">Political Science</span></div>
+  <div class="venn-circle history" data-field="history" onclick="disciplineKeywordFocus('history',this)"><span class="name">History / Humanities</span></div>
+
+  <div class="wgs-intersection discipline-keyword-center" onclick="disciplineKeywordFocus('center',this)">
+    <div><strong>How does income inequality affect women in the workplace?</strong></div>
+  </div>
+
+  <div class="sharedTag disciplineKeywordTag" data-tag="sociology">wage inequality<br>occupational segregation<br>social stratification</div>
+  <div class="sharedTag disciplineKeywordTag" data-tag="psychology">workplace discrimination<br>gender bias<br>job satisfaction</div>
+  <div class="sharedTag disciplineKeywordTag" data-tag="health">occupational health<br>health disparities<br>work stress</div>
+  <div class="sharedTag disciplineKeywordTag" data-tag="media">representation<br>gender stereotypes<br>workplace discourse</div>
+  <div class="sharedTag disciplineKeywordTag" data-tag="politics">pay equity<br>labor policy<br>employment law</div>
+  <div class="sharedTag disciplineKeywordTag" data-tag="history">women workers<br>labor history<br>women's work</div>
+
+  <div class="venn-key"><strong>Vocabulary is disciplinary.</strong>The words you start with can change as you learn how researchers in a field describe the issue.</div>
+</div>
+</section>
+
+<section class="stage">
+<div class="stagehead"><div><h2>Same search, different results</h2><p>Keep the search the same. Change the research environment. Select a discipline to see the kinds of scholarship and information the same search might surface there.</p></div><button class="next" onclick="go(5)">Where should you search? →</button><button class="tab-reset" type="button" onclick="resetAtlasTab(4)">Reset</button></div>
+<div class="venn-canvas venn4 dbvenn resultsvenn" id="resultsVennCanvas">
+<div class="venn-key"><strong>Don’t change the search. Change where you search.</strong><br>The same words can enter different scholarly conversations depending on the research environment.</div>
+
+<div class="venn-circle soc" data-field="sociology" onclick="resultsVennFocus('sociology',this)"><span class="name">Sociology</span></div>
+<div class="venn-circle psych" data-field="psychology" onclick="resultsVennFocus('psychology',this)"><span class="name">Psychology</span></div>
+<div class="venn-circle health" data-field="health" onclick="resultsVennFocus('health',this)"><span class="name">Health</span></div>
+<div class="venn-circle media" data-field="media" onclick="resultsVennFocus('media',this)"><span class="name">Media Studies</span></div>
+<div class="venn-circle politics" data-field="politics" onclick="resultsVennFocus('politics',this)"><span class="name">Political Science</span></div>
+<div class="venn-circle history" data-field="history" onclick="resultsVennFocus('history',this)"><span class="name">History / Humanities</span></div>
+
+<div class="wgs-intersection results-center">
+<div><span class="search-label">SEARCH</span><strong>women AND<br>&quot;income inequality&quot;</strong></div>
+</div>
+
+<div class="sharedTag resultTag" data-tag="sociology"><b>Quantitative research</b><span>patterns in earnings &amp; employment</span><b>Qualitative research</b><span>women’s experiences of economic insecurity</span><b>Institutional research</b><span>workplace structures &amp; inequality</span><b>Demographic research</b><span>differences across populations</span></div>
+
+<div class="sharedTag resultTag" data-tag="psychology"><b>Survey research</b><span>financial stress &amp; wellbeing</span><b>Behavioral research</b><span>attitudes toward pay &amp; status</span><b>Workplace research</b><span>experiences of discrimination</span><b>Individual-level research</b><span>economic insecurity &amp; identity</span></div>
+
+<div class="sharedTag resultTag" data-tag="health"><b>Population health research</b><span>income &amp; health outcomes</span><b>Disparities research</b><span>healthcare access &amp; inequality</span><b>Public-health research</b><span>economic insecurity &amp; wellbeing</span><b>Patient-centered research</b><span>lived effects of financial strain</span></div>
+
+<div class="sharedTag resultTag" data-tag="media"><b>Media analysis</b><span>representations of women’s economic status</span><b>News research</b><span>coverage of wage inequality</span><b>Cultural analysis</b><span>representations of work &amp; class</span><b>Discourse research</b><span>narratives about economic success</span></div>
+
+<div class="sharedTag resultTag" data-tag="politics"><b>Policy analysis</b><span>government responses to inequality</span><b>Institutional research</b><span>labor &amp; welfare systems</span><b>Public-opinion research</b><span>attitudes toward inequality</span><b>Comparative research</b><span>differences across policy systems</span></div>
+
+<div class="sharedTag resultTag" data-tag="history"><b>Historical scholarship</b><span>changes in women’s economic roles</span><b>Archival research</b><span>records of women’s work &amp; employment</span><b>Primary-source research</b><span>workers, employers &amp; movements</span><b>Cultural analysis</b><span>changing meanings of women’s work</span></div>
+</div>
+</section>
+
+<section class="stage">
+<div class="stagehead"><div><h2>Where should you search?</h2><p>Interdisciplinary questions often cross database boundaries. Select a discipline to see a focused research environment, or use the center for broad discovery across fields.</p></div><button class="next" onclick="go(6)">A feminist research lens →</button><button class="tab-reset" type="button" onclick="resetAtlasTab(5)">Reset</button></div>
+<div class="venn-canvas venn4 dbvenn" id="dbVennCanvas">
+<div class="venn-key"><strong>Where should you look?</strong><br>Different research questions lead to different places to search. Explore the disciplines to find databases that match your question, or start with Research@UWW when your topic crosses fields.</div>
+
+<div class="venn-circle soc" data-field="sociology" onclick="dbVennFocus('sociology',this)"><span class="name">Sociology</span></div>
+<div class="venn-circle psych" data-field="psychology" onclick="dbVennFocus('psychology',this)"><span class="name">Psychology</span></div>
+<div class="venn-circle health" data-field="health" onclick="dbVennFocus('health',this)"><span class="name">Health</span></div>
+<div class="venn-circle media" data-field="media" onclick="dbVennFocus('media',this)"><span class="name">Media Studies</span></div>
+<div class="venn-circle politics" data-field="politics" onclick="dbVennFocus('politics',this)"><span class="name">Political Science</span></div>
+<div class="venn-circle history" data-field="history" onclick="dbVennFocus('history',this)"><span class="name">History / Humanities</span></div>
+
+<div class="wgs-intersection db-center" onclick="dbVennFocus('center',this)">
+<div><strong><a href="https://www.uww.edu/library" target="_blank" rel="noopener noreferrer">Research@UWW</a></strong><span class="center-secondary"><a href="https://www.proquest.com/advanced?parentSessionId=J3Q96Fa4%2FcmeFd2iTo80vRSYGCTRzTTj7c9PzF7dcco%3D&accountid=14791" target="_blank" rel="noopener noreferrer">GenderWatch</a></span></div>
+</div>
+
+<div class="sharedTag" data-tag="sociology" style="left:45%;top:24%"><a href="https://research-ebsco-com.libproxy.uww.edu/c/g2mpdl/search/advanced/filters?autocorrect=y&defaultdb=sih" target="_blank" rel="noopener noreferrer">SocINDEX<br>with Full Text</a></div>
+<div class="sharedTag" data-tag="psychology" style="left:60%;top:32%"><a href="https://research-ebsco-com.libproxy.uww.edu/c/g2mpdl/search/advanced/filters?autocorrect=y&defaultdb=psyh" target="_blank" rel="noopener noreferrer">PsycINFO</a></div>
+<div class="sharedTag" data-tag="health" style="left:60%;top:46%"><a href="https://libguides.uww.edu/az/databases?s=104637" target="_blank" rel="noopener noreferrer">Medicine &amp; Health databases</a></div>
+<div class="sharedTag" data-tag="media" style="left:53%;top:52%"><a href="https://research-ebsco-com.libproxy.uww.edu/c/g2mpdl/search/advanced/filters?autocorrect=y&defaultdb=ufh" target="_blank" rel="noopener noreferrer">Communication &amp;<br>Mass Media Complete</a></div>
+<div class="sharedTag" data-tag="politics" style="left:37%;top:51%"><a href="https://research-ebsco-com.libproxy.uww.edu/c/g2mpdl/search/advanced/filters?autocorrect=y&defaultdb=poh" target="_blank" rel="noopener noreferrer">Political Science<br>Complete</a></div>
+<div class="sharedTag" data-tag="history" style="left:31%;top:35%"><a href="https://www-jstor-org.libproxy.uww.edu/" target="_blank" rel="noopener noreferrer">JSTOR</a><br>+ <a href="https://muse-jhu-edu.libproxy.uww.edu/" target="_blank" rel="noopener noreferrer">Project MUSE</a></div>
+
+
+</div></section>
+
+
+<section class="stage">
+<div class="stagehead"><div><h2>A feminist research lens</h2><p><strong>Women’s &amp; Gender Studies is both what we study and how we study it.</strong></p></div><button class="next" onclick="go(7)">Your turn →</button></div>
+
+<div class="lens-flow" aria-label="What we study, the feminist lens we bring, and what that lens helps us notice">
+  <div class="lens-subject">
+    <div class="lens-kicker">WHAT WE STUDY</div>
+    <div class="topic-cloud" aria-label="Gender, identity, inequality, institutions, histories, and experiences">
+      <span>gender</span><span>identity</span><span>inequality</span>
+      <span>institutions</span><span>histories</span><span>experiences</span>
+    </div>
+  </div>
+
+  <div class="lens-arrow" aria-hidden="true">→</div>
+
+  <div class="lens-center">
+    <div class="lens-kicker">THE LENS WE BRING</div>
+    <div class="power-frame">
+      <div class="power-label">POWER</div>
+      <div class="power-caption">shapes what becomes visible</div>
+      <div class="lens-graphic">
+      <div class="lens-ring">
+        <button type="button" class="lens-term active" data-lens="positionality"><strong>Positionality</strong><span>Where are we looking from?</span></button>
+        <button type="button" class="lens-term" data-lens="intersectionality"><strong>Intersectionality</strong><span>What overlaps?</span></button>
+        <button type="button" class="lens-term" data-lens="authority"><strong>Authority</strong><span>Authoritative for what?</span></button>
+        <button type="button" class="lens-term" data-lens="language"><strong>Language</strong><span>Who names it?</span></button>
+        <button type="button" class="lens-term" data-lens="absence"><strong>Absence</strong><span>Who’s missing?</span></button>
+      </div>
+      <div class="lens-handle" aria-hidden="true"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="lens-arrow" aria-hidden="true">→</div>
+
+  <div class="lens-output" aria-live="polite">
+    <div class="lens-kicker">WHAT WE NOTICE</div>
+    <div class="notice-words" id="lensNotice">
+      <strong>STANDPOINT</strong><strong>PERSPECTIVE</strong><strong>CONTEXT</strong>
+    </div>
+    <p id="lensNoticePrompt">Changing where we look from can change what comes into view.</p>
+  </div>
+</div>
+</section>
+
+<section class="stage">
+<div class="stagehead"><div><h2>Your turn</h2><p>Now you’ll use the same process yourself:</p><ul class="your-turn-steps"><li><strong>Choose</strong> one disciplinary lens for the question below.</li><li><strong>Reframe</strong> the question through that discipline.</li><li><strong>Build</strong> a search by identifying the main concepts and useful keywords.</li><li><strong>Predict</strong> what kind of evidence you might find.</li><li><strong>Search</strong> the corresponding research database and find one source.</li><li><strong>Compare</strong> what you predicted with what you actually found.</li><li><strong>Reflect</strong> on what your lens made visible—and what might still be missing.</li></ul></div></div>
+<div class="venn-canvas venn4" id="activityVennCanvas">
+<div class="venn-circle soc"><span class="name">Sociology</span></div>
+<div class="venn-circle psych"><span class="name">Psychology</span></div>
+<div class="venn-circle health"><span class="name">Health</span></div>
+<div class="venn-circle media"><span class="name">Media Studies</span></div>
+<div class="venn-circle politics"><span class="name">Political Science</span></div>
+<div class="venn-circle history"><span class="name">History / Humanities</span></div>
+<div class="wgs-intersection activity-question"><div><strong>Why do experiences of workplace inequality differ among women of different racial and socioeconomic backgrounds?</strong></div></div>
+</div>
+<div class="your-turn-reflection">
+<h3>After you search: reflect</h3>
+<ol>
+<li>What became visible through your lens that another discipline might have missed?</li>
+<li>Even though our question considers gender, race, and socioeconomic background, whose experiences could still be missing from the research?</li>
+<li>What can your chosen source help us understand about this question? What can’t it tell us? What other evidence could we use to understand what’s missing?</li>
+<li>What stayed with you from this experience? Why?</li>
+</ol>
+</div>
+</section>
+
+</main></div>
+<script>
+const stages=[...document.querySelectorAll('.stage')], nav=[...document.querySelectorAll('.progress button')];
+function go(i){stages.forEach((s,j)=>s.classList.toggle('on',i===j));nav.forEach((b,j)=>b.classList.toggle('on',i===j))}
+window.go=go;
+
+
+
+
+const dbVennData={
+ sociology:{title:"Sociology",db:"SocINDEX with Full Text",body:"A focused place to search sociology research on social structures, inequality, family, work, institutions, gender roles, and stratification.",tip:"Use it when the social structure or institutional dimension of your question is central."},
+ psychology:{title:"Psychology",db:"PsycINFO",body:"A focused research environment for psychology, including identity, attitudes, stereotypes, behavior, relationships, and body image.",tip:"Its controlled vocabulary can also reveal the terminology psychology uses to organize a topic."},
+ history:{title:"History / Humanities",db:"JSTOR + Project MUSE",body:"Useful for historical scholarship, theory, and humanities/social-science conversations around gender, sexuality, race, culture, and change over time.",tip:"These can be especially useful when your question needs historical or theoretical context."},
+ politics:{title:"Political Science",db:"Political Science Complete",body:"A focused research environment for policy, government, rights, law, representation, political institutions, and political theory.",tip:"Use it when power is operating through policy, law, government, or formal political institutions."},
+ media:{title:"Media Studies",db:"Communication & Mass Media Complete",body:"A focused research environment for media, representation, communication, discourse, audiences, and popular culture.",tip:"Use it when representation or communication is part of the research problem."},
+ health:{title:"Health",db:"Health databases + PsycINFO",body:"Health-focused databases can surface research on wellbeing, disparities, access, embodiment, healthcare, and the health consequences of inequality.",tip:"The best database depends on whether the question is primarily medical, psychological, public-health, or social."}
+};
+function dbVennFocus(k,el){
+ const c=document.getElementById('dbVennCanvas');
+ c.classList.add('focus');
+ document.querySelectorAll('#dbVennCanvas .venn-circle').forEach(x=>x.classList.remove('on'));
+ document.querySelectorAll('#dbVennCanvas .sharedTag').forEach(x=>x.classList.remove('show'));
+ if(k==='center'){
+   document.querySelectorAll('#dbVennCanvas .venn-circle').forEach(x=>x.classList.add('on'));
+   document.querySelectorAll('#dbVennCanvas .sharedTag').forEach(x=>x.classList.add('show'));
+   document.getElementById('dbVennDetail').innerHTML=`<div><div class="label">Research@UWW</div><strong>Broad discovery across disciplines.</strong><p>Use the center when your question crosses fields, when you want to see what kinds of scholarship exist, or when you are not yet sure which disciplinary literature will matter most.</p></div><div><div class="label">Then branch outward</div><strong>Broad discovery and subject databases do different work.</strong><p>Research@UWW is a starting point—not a replacement for every specialized database.</p></div>`;
+   return;
+ }
+ el.classList.add('on');
+ const tag=document.querySelector(`#dbVennCanvas .sharedTag[data-tag="${k}"]`); if(tag)tag.classList.add('show');
+ const d=dbVennData[k];
+ document.getElementById('dbVennDetail').innerHTML=`<div><div class="label">${d.title}</div><strong>${d.db}</strong><p>${d.body}</p></div><div><div class="label">Why move outward?</div><strong>${d.tip}</strong><p>You can move between broad discovery and disciplinary databases as the question develops.</p></div>`;
+}
+window.dbVennFocus=dbVennFocus;
+
+function venn4Focus(k,el){
+ const c=document.getElementById('vennCanvas');
+ c.classList.add('focus');
+ document.querySelectorAll('.venn4 .venn-circle').forEach(x=>x.classList.remove('on'));
+ document.querySelectorAll('.venn4 .sharedTag').forEach(x=>x.classList.remove('show'));
+ if(k==='wgs'){
+   document.querySelectorAll('.venn4 .venn-circle').forEach(x=>x.classList.add('on'));
+   document.querySelectorAll('.venn4 .sharedTag').forEach(x=>x.classList.add('show'));
+   document.getElementById('vennDetail').innerHTML=`<div><div class="label">Women’s & Gender Studies</div><strong>Knowledge formed across disciplinary boundaries.</strong><p>WGS brings multiple disciplinary approaches into conversation while also developing feminist theory, intersectionality, feminist epistemology, queer theory, standpoint theory, and critiques of gender and power.</p></div><div><div class="label">Research implication</div><strong>No one surrounding discipline is coextensive with WGS.</strong><p>The field is interdisciplinary without being reducible to a collection of other disciplines.</p></div>`;
+   return;
+ }
+ el.classList.add('on');
+ const tag=document.querySelector(`.venn4 .sharedTag[data-tag="${k}"]`); if(tag)tag.classList.add('show');
+ const d=vennData[k];
+ document.getElementById('vennDetail').innerHTML=`<div><div class="label">${d.title}</div><strong>${d.body}</strong></div><div><div class="label">At this intersection</div><strong>${d.q}</strong><p>This is shared territory—not the whole of ${el.innerText.trim()}, and not the whole of WGS.</p></div>`;
+}
+window.venn4Focus=venn4Focus;
+
+const vennData={
+wgs:{title:"Women’s & Gender Studies",body:"The field itself includes feminist theory, intersectionality, feminist epistemology, queer theory, standpoint theory, and sustained analysis of gender and power.",q:"Its interdisciplinary connections do not exhaust the field."},
+sociology:{title:"Sociology × WGS",body:"Shared territory includes gender as social structure, institutions, inequality, family, work, and stratification.",q:"Example question: How do workplace institutions reproduce gender inequality?"},
+psychology:{title:"Psychology × WGS",body:"Shared territory includes identity, stereotypes, embodiment, attitudes, bias, and gender development.",q:"Example question: How do gender stereotypes shape workplace experience and identity?"},
+history:{title:"History × WGS",body:"Shared territory includes women’s history, histories of gender and sexuality, change over time, recovery work, and archival silences.",q:"Example question: Whose workplace experiences were recorded—and whose were not?"},
+politics:{title:"Political Science × WGS",body:"Shared territory includes rights, representation, feminist political theory, public policy, law, and institutional power.",q:"Example question: How do policies distribute workplace rights and protections?"},
+media:{title:"Media Studies × WGS",body:"Shared territory includes representation, discourse, gendered narratives, popular culture, and media power.",q:"Example question: How is women’s work represented and valued in media?"},
+health:{title:"Health × WGS",body:"Shared territory includes reproductive health, health disparities, embodiment, caregiving, access, and critiques of medical authority.",q:"Example question: How does workplace inequality shape health and wellbeing?"}
+};
+function vennFocus(k,el){
+ const c=document.getElementById('vennCanvas');
+ document.querySelectorAll('.venn-circle').forEach(x=>x.classList.remove('on'));
+ document.querySelectorAll('.overlapTag').forEach(x=>x.classList.remove('show'));
+ el.classList.add('on'); c.classList.add('focus');
+ if(k!=='wgs'){const t=document.querySelector(`.overlapTag[data-tag="${k}"]`); if(t)t.classList.add('show')}
+ else document.querySelectorAll('.overlapTag').forEach(x=>x.classList.add('show'));
+ const d=vennData[k];
+ document.getElementById('vennDetail').innerHTML=`<div><div class="label">${d.title}</div><strong>${d.body}</strong></div><div><div class="label">Research implication</div><strong>${d.q}</strong><p>${k==='wgs'?'WGS remains visible as its own intellectual space.':'The overlap matters, but neither field contains the other.'}</p></div>`;
+}
+window.vennFocus=vennFocus;
+
+const disciplines={
+sociology:["How do workplace structures reproduce gender inequality?","SocINDEX","social structure · occupational segregation · institutions"],
+psychology:["How do stereotypes and workplace attitudes shape people’s experiences?","PsycINFO","stereotypes · attitudes · identity · bias"],
+politics:["How do laws and public policies shape workplace gender inequality?","Political Science Complete","policy · rights · regulation · institutions"],
+media:["How are gender and work represented and framed in media?","Communication & Mass Media Complete","representation · framing · discourse"],
+history:["How has gender inequality at work changed over time?","JSTOR · historical collections","historical change · labor history · continuity"],
+health:["How does workplace inequality affect health and wellbeing?","Health databases · PsycINFO","wellbeing · stress · access · disparities"],
+economics:["How are gender differences in earnings produced in labor markets?","SocINDEX · economics literature","wages · labor markets · occupational segregation"]
+};
+function discipline(k,el){
+ document.querySelectorAll('.disc').forEach(x=>x.classList.remove('on')); el.classList.add('on');
+ const d=disciplines[k];
+ document.getElementById('discDetail').innerHTML=`<div><div class="label">This discipline asks</div><strong>${d[0]}</strong><p>${d[2]}</p></div><div><div class="label">Research environment</div><strong>${d[1]}</strong><p>The topic did not change. The disciplinary lens did.</p></div>`;
+}
+window.discipline=discipline;
+let layers=new Set();
+const layerData={
+race:{q:"How do race and gender interact in shaping workplace inequality?",v:"intersectionality · racialized inequality · occupational segregation",e:"Disaggregated evidence that does not collapse racial groups into a single average.",b:"An overall result for “women” may conceal substantially different experiences among women."},
+class:{q:"How do class and gender interact in shaping workplace inequality?",v:"class · socioeconomic status · labor inequality · gender",e:"Evidence attentive to occupation, income, employment conditions, and economic position.",b:"Professional women’s experiences may be mistaken for women’s workplace experiences generally."},
+disability:{q:"How do disability and gender interact in shaping workplace inequality?",v:"disability · ableism · workplace accommodation · intersectionality",e:"Evidence that makes disability status and accessibility visible rather than treating them as incidental.",b:"Research may quietly assume a nondisabled worker as the norm."},
+sexuality:{q:"How do sexuality and gender interact in shaping workplace inequality?",v:"sexuality · heteronormativity · LGBTQ+ workers · intersectionality",e:"Evidence that does not assume heterosexual experience within broad gender categories.",b:"A category such as “women” may hide differences related to sexuality and workplace disclosure."}
+};
+function toggleLayer(k,el){
+ if(layers.has(k)){layers.delete(k);el.classList.remove('on')}else{layers.add(k);el.classList.add('on')}
+ document.getElementById('line-'+k).classList.toggle('on',layers.has(k));
+ const arr=[...layers];
+ if(arr.length===0){
+  cq.textContent="How does gender shape workplace inequality?";cv.textContent="gender inequality · gender roles · workplace inequality";ce.textContent="Evidence that can compare patterns and explain workplace structures.";cb.textContent="“Women” can look like a single, uniform category.";interNote.textContent="Gender is already part of the analysis. Add another dimension to see what changes.";return;
+ }
+ if(arr.length===1){
+  const d=layerData[arr[0]];cq.textContent=d.q;cv.textContent=d.v;ce.textContent=d.e;cb.textContent=d.b;interNote.textContent="The new dimension crosses the original question—it is not merely another subgroup.";return;
+ }
+ const labels=arr.map(x=>x.charAt(0).toUpperCase()+x.slice(1));
+ cq.textContent=`How do ${labels.join(", ")} and gender interact in shaping workplace inequality?`;
+ cv.textContent="intersectionality · systems of power · "+arr.map(x=>x==="race"?"racialized inequality":x).join(" · ");
+ ce.textContent="Evidence that can examine overlapping dimensions rather than isolating each one as a separate variable.";
+ cb.textContent="Studying each dimension separately can miss effects produced through their interaction.";
+ interNote.textContent=`${arr.length+1} dimensions are now acting on the same research problem. The analysis is becoming intersectional.`;
+}
+window.toggleLayer=toggleLayer;
+
+const qdata={
+scale:["Population patterns","Quantitative studies · government statistics","SocINDEX · government datasets"],
+experience:["Lived experience","Qualitative studies · interviews · oral histories","SocINDEX · archives · oral-history collections"],
+resistance:["Movement knowledge","Activist publications · community records · movement archives","Independent Voices · feminist periodicals · archives"],
+policy:["Institutional response","Law · policy documents · policy research","Political Science Complete · government sources"],
+history:["Historical context","Archives · historical periodicals · historical scholarship","JSTOR · archives · historical collections"],
+why:["Explanation","Theory · sociological research · interpretive scholarship","SocINDEX · JSTOR · Project MUSE"]
+};
+function chooseQ(k,el){
+ document.querySelectorAll('.qnode').forEach(x=>x.classList.remove('on'));el.classList.add('on');
+ const d=qdata[k], a=document.getElementById('flowEvidence'), b=document.getElementById('flowWhere');
+ a.innerHTML=`<b>${d[0]}</b><div>${d[1]}</div>`; b.innerHTML=`<b>Where this path leads</b><div>${d[2]}</div>`;
+ a.classList.add('show');b.classList.add('show');
+ document.getElementById('flowSvg').innerHTML='<path class="active" d="M550 300 C550 335 550 350 550 370"/><path class="active" d="M550 435 C550 460 550 470 550 485"/>';
+}
+window.chooseQ=chooseQ;
+const splits={
+race:[["Black women",34,28,100],["Latina women",65,25,88],["Asian women",77,56,75],["Native women",49,65,68],["White women",25,68,92],["Who else?",68,78,58],"How do race and gender interact in shaping workplace inequality?"],
+class:[["Low-wage workers",30,28,105],["Professionals",68,27,88],["Working class",73,61,82],["Middle class",42,68,92],["Who else?",63,79,58],"How do gender and economic position interact in shaping workplace inequality?"],
+sexuality:[["Lesbian women",30,30,100],["Bisexual women",67,27,88],["Heterosexual women",72,63,100],["Queer women",40,69,82],["Who else?",64,80,58],"How do gender and sexuality interact in shaping workplace inequality?"],
+disability:[["Disabled women",35,32,112],["Nondisabled women",68,30,112],["Different disabilities",67,67,100],["Who else?",38,73,58],"How do gender and disability interact in shaping workplace inequality?"],
+migration:[["Immigrant women",32,29,105],["U.S.-born women",68,28,105],["Citizenship status",70,65,95],["Migrant workers",38,69,90],["Who else?",62,80,58],"How do gender, migration, and citizenship shape workplace inequality?"],
+age:[["Young workers",30,30,95],["Midlife workers",67,28,100],["Older workers",70,66,95],["Caregiving stages",38,68,95],["Who else?",61,80,58],"How do gender, age, and life stage shape workplace inequality?"]
+};
+function split(k,el){
+ document.querySelectorAll('.dim').forEach(x=>x.classList.remove('on'));el.classList.add('on');
+ document.getElementById('womenCircle').classList.add('split');
+ const f=document.getElementById('fragments'); f.classList.add('show'); f.innerHTML='';
+ const arr=splits[k], question=arr[arr.length-1];
+ arr.slice(0,-1).forEach(x=>{let d=document.createElement('div');d.className='bubble';d.style.left=x[1]+'%';d.style.top=x[2]+'%';d.style.width=x[3]+'px';d.style.height=x[3]+'px';d.textContent=x[0];f.appendChild(d)});
+ document.getElementById('rewrite').innerHTML='<strong>Question changed:</strong> '+question+' <span style="color:#8a6570">The category became less simple.</span>';
+}
+window.split=split;
+function sourceInfo(el,msg){document.querySelectorAll('.source').forEach(x=>x.classList.remove('active'));el.classList.add('active');document.getElementById('mapnote').innerHTML='<strong>'+el.innerText.replace(/\n/g,' ')+'</strong><br>'+msg}
+window.sourceInfo=sourceInfo;
+const rows=[
+["Government data",[3,1,0,2,0,3]],["Quantitative scholarship",[3,2,1,1,0,2]],["Qualitative scholarship",[1,3,3,2,2,1]],["Theory",[0,3,2,2,2,1]],["Oral histories",[0,1,3,3,2,0]],["Mainstream journalism",[1,1,2,2,1,2]],["Activist publications",[0,2,2,3,3,2]],["Community organizations",[1,2,3,2,3,2]],["Archives",[0,2,3,3,3,1]]
+];
+const cols=["Pattern / scale","Explanation","Lived experience","Historical context","Resistance / activism","Policy"];
+function buildHeat(){
+ const h=document.getElementById('heat');h.innerHTML='<div class="hcell hhead">Source type ↓</div>';
+ cols.forEach((c,i)=>h.innerHTML+=`<button class="hcell hhead hcol" onclick="selectCol(${i})">${c}</button>`);
+ rows.forEach(r=>{h.innerHTML+=`<div class="hcell rowhead">${r[0]}</div>`;r[1].forEach((v,i)=>h.innerHTML+=`<div class="hcell fit${v}" data-col="${i}">${v===3?'strong fit':v===2?'useful':v===1?'limited':'—'}</div>`)});
+}
+function selectCol(i){document.querySelectorAll('.hcol').forEach((x,j)=>x.classList.toggle('sel',i===j));document.querySelectorAll('[data-col]').forEach(x=>{x.style.opacity=(+x.dataset.col===i?'1':'.28')})}
+window.selectCol=selectCol;buildHeat();
+
+const evidenceVennData={
+  sociology:{
+    label:"Common evidence",
+    title:"Surveys, interviews, demographic data, and ethnography",
+    body:"Sociological research often looks for patterns in groups, institutions, social structures, and lived experience.",
+    label2:"What it can reveal",
+    title2:"Patterns + social context",
+    tip:"These forms of evidence can connect individual experiences to larger structures such as work, family, education, inequality, and stratification."
+  },
+  psychology:{
+    label:"Common evidence",
+    title:"Experiments, scales and measures, behavioral studies, and interviews",
+    body:"Psychological research often investigates attitudes, identity, stereotypes, behavior, relationships, cognition, and individual experience.",
+    label2:"What it can reveal",
+    title2:"Behavior + psychological processes",
+    tip:"Measures and experiments can identify patterns or relationships, while interviews and qualitative work can add context and meaning."
+  },
+  health:{
+    label:"Common evidence",
+    title:"Health statistics, clinical and public-health data, and patient experience",
+    body:"Health research may combine population-level patterns with evidence about healthcare, wellbeing, embodiment, access, and lived experience.",
+    label2:"What it can reveal",
+    title2:"Health patterns + embodied experience",
+    tip:"Different forms of health evidence can show both the scale of disparities and how systems of care are experienced."
+  },
+  media:{
+    label:"Common evidence",
+    title:"Media texts, content or discourse analysis, and audience research",
+    body:"Media research can treat advertisements, news, television, film, social media, and other cultural texts as evidence.",
+    label2:"What it can reveal",
+    title2:"Representation + discourse",
+    tip:"These sources can show how gender and other identities are represented, narrated, normalized, challenged, or contested."
+  },
+  politics:{
+    label:"Common evidence",
+    title:"Policy documents, legislation, public-opinion data, and institutional records",
+    body:"Political research often examines formal rules and institutions alongside evidence about public attitudes, representation, rights, and political behavior.",
+    label2:"What it can reveal",
+    title2:"Policy + institutional power",
+    tip:"These forms of evidence can show how power is organized through law, government, policy, and political institutions."
+  },
+  history:{
+    label:"Common evidence",
+    title:"Archives, primary sources, historical documents, and cultural texts",
+    body:"Historical and humanities research often interprets materials produced in a particular time and place, alongside later scholarship.",
+    label2:"What it can reveal",
+    title2:"Change + historical context",
+    tip:"Archives can preserve voices and institutions—but their silences can also raise questions about whose experiences were recorded or preserved."
+  }
+};
+
+function evidenceVennFocus(field,el){
+  const canvas=document.getElementById("evidenceVennCanvas");
+  const detail=document.getElementById("evidenceVennDetail");
+  const circles=[...canvas.querySelectorAll(".venn-circle")];
+  const tags=[...canvas.querySelectorAll(".sharedTag")];
+  circles.forEach(c=>c.classList.remove("on"));
+  tags.forEach(t=>t.classList.remove("show"));
+  canvas.classList.add("focus");
+
+  if(field==="center"){
+    circles.forEach(c=>c.classList.add("on"));
+    tags.forEach(t=>t.classList.add("show"));
+    detail.innerHTML=`<div><div class="label">Women’s &amp; Gender Studies</div><strong>Different kinds of evidence can work together.</strong><p>WGS frequently brings evidence from multiple disciplinary traditions into conversation rather than treating one form as universally sufficient.</p></div><div><div class="label">For example</div><strong>Scale, experience, history, representation, and policy can illuminate different parts of the same problem.</strong><p>Statistics might establish a pattern; interviews or oral histories can show how it is experienced; archives can trace change; cultural texts can reveal representation; policy documents can show institutional responses.</p></div>`;
+    return;
+  }
+
+  const d=evidenceVennData[field];
+  if(!d)return;
+  const circle=canvas.querySelector(`.venn-circle[data-field="${field}"]`);
+  const tag=canvas.querySelector(`.sharedTag[data-tag="${field}"]`);
+  if(circle)circle.classList.add("on");
+  if(tag)tag.classList.add("show");
+  detail.innerHTML=`<div><div class="label">${d.label}</div><strong>${d.title}</strong><p>${d.body}</p></div><div><div class="label">${d.label2}</div><strong>${d.title2}</strong><p>${d.tip}</p></div>`;
+}
+
+
+document.querySelectorAll("#dbVennCanvas a").forEach(a=>{
+  a.addEventListener("click",e=>e.stopPropagation());
+});
+
+
+
+const resultsVennData={
+ sociology:{title:"Sociology",lead:"Patterns, institutions, populations, and lived experience",body:"The same search may surface studies of earnings and employment patterns, workplace structures, demographic differences, and women’s experiences of economic insecurity."},
+ psychology:{title:"Psychology",lead:"Stress, attitudes, discrimination, and individual experience",body:"The same search may surface research on financial stress, wellbeing, workplace discrimination, attitudes toward pay and status, and experiences of economic insecurity."},
+ health:{title:"Health",lead:"Health outcomes, access, disparities, and wellbeing",body:"The same search may surface research connecting income to health outcomes, healthcare access, disparities, economic insecurity, and wellbeing."},
+ media:{title:"Media Studies",lead:"Representation, news coverage, class, and cultural narratives",body:"The same search may surface studies of how women’s economic status, wage inequality, work, class, and economic success are represented in media and public discourse."},
+ politics:{title:"Political Science",lead:"Policy, institutions, public opinion, and comparison",body:"The same search may surface research on labor policy, welfare systems, government responses to inequality, public attitudes, and differences across policy systems."},
+ history:{title:"History / Humanities",lead:"Historical change, archives, primary sources, and cultural meaning",body:"The same search may surface histories of women’s economic roles, archival research on work and employment, primary sources, and analysis of changing meanings attached to women’s work."}
+};
+function resultsVennFocus(k,el){
+ const canvas=document.getElementById("resultsVennCanvas");
+ const detail=document.getElementById("resultsVennDetail");
+ canvas.classList.add("focus");
+ canvas.querySelectorAll(".venn-circle").forEach(x=>x.classList.remove("on"));
+ canvas.querySelectorAll(".sharedTag").forEach(x=>x.classList.remove("show"));
+ if(el)el.classList.add("on");
+ const tag=canvas.querySelector(`.sharedTag[data-tag="${k}"]`);
+ if(tag)tag.classList.add("show");
+ const d=resultsVennData[k];
+ if(d){
+  detail.innerHTML=`<div><div class="label">${d.title}</div><strong>${d.lead}</strong><p>${d.body}</p></div><div><div class="label">Same search</div><strong><code>women AND "income inequality"</code></strong><p>The query has not changed. The research environment has.</p></div>`;
+ }
+}
+window.resultsVennFocus=resultsVennFocus;
+</script>
+
+<script>
+document.querySelectorAll('#dbVennCanvas .sharedTag a, #dbVennCanvas .db-center a').forEach(function(a){
+  a.addEventListener('click',function(e){e.stopPropagation();});
+});
+</script>
+
+
+<script>
+const atlasInitialStages = Array.from(document.querySelectorAll('.stage')).map(stage => stage.innerHTML);
+
+function resetAtlasTab(index){
+  const stages = document.querySelectorAll('.stage');
+  const stage = stages[index];
+  if(!stage || atlasInitialStages[index] == null) return;
+
+  stage.innerHTML = atlasInitialStages[index];
+
+  /* Rebind only inline-independent listeners that the original page attached via JS. */
+  if(index === 5 && typeof initHeatmap === 'function'){
+    initHeatmap();
+  }
+}
+window.resetAtlasTab = resetAtlasTab;
+</script>
+
+
+<script>
+function careFocus(k,el){
+  const c=document.getElementById('careVennCanvas');
+  if(!c)return;
+  c.classList.add('focus');
+  c.querySelectorAll('.venn-circle').forEach(x=>x.classList.remove('on'));
+  c.querySelectorAll('.sharedTag').forEach(x=>x.classList.remove('show'));
+  if(k==='center'){
+    c.querySelectorAll('.venn-circle').forEach(x=>x.classList.add('on'));
+    c.querySelectorAll('.sharedTag').forEach(x=>x.classList.add('show'));
+    return;
+  }
+  if(el)el.classList.add('on');
+  const tag=c.querySelector('.sharedTag[data-tag="'+k+'"]');
+  if(tag)tag.classList.add('show');
+}
+window.careFocus=careFocus;
+</script>
+
+
+<script>
+const keywordData={
+ women:{title:"women",text:"Possible alternatives: woman · female workers · gender · gender inequality",note:"Which term works best depends on what the literature calls the population or issue you are studying."},
+ income:{title:"income inequality",text:'Possible alternatives: wage inequality · pay gap · earnings inequality · "gender wage gap"',note:"Quotation marks are useful when you want the database to keep a multi-word phrase together."},
+ workplace:{title:"workplace",text:"Possible alternatives: employment · work · occupations · labor market",note:"OR can connect alternatives: workplace OR employment OR occupations."}
+};
+function keywordFocus(k,el){
+ const box=document.getElementById("keywordAlternatives"),canvas=document.getElementById("keywordCanvas");
+ if(!box||!canvas)return;
+ canvas.querySelectorAll(".keyword-chip").forEach(x=>x.classList.remove("on"));
+ if(el)el.classList.add("on");
+ const d=keywordData[k];
+ box.innerHTML='<span class="keyword-step">TRY OTHER LANGUAGE</span><strong>'+d.title+'</strong><p>'+d.text+'<br>'+d.note+'</p>';
+}
+window.keywordFocus=keywordFocus;
+</script>
+
+
+<script>
+function disciplineKeywordFocus(k,el){
+  const c=document.getElementById('disciplineKeywordVenn');
+  if(!c)return;
+  c.classList.add('focus');
+  c.querySelectorAll('.venn-circle').forEach(x=>x.classList.remove('on'));
+  c.querySelectorAll('.sharedTag').forEach(x=>x.classList.remove('show'));
+  if(k==='center'){
+    c.querySelectorAll('.venn-circle').forEach(x=>x.classList.add('on'));
+    c.querySelectorAll('.sharedTag').forEach(x=>x.classList.add('show'));
+    return;
+  }
+  if(el)el.classList.add('on');
+  const tag=c.querySelector('.sharedTag[data-tag="'+k+'"]');
+  if(tag)tag.classList.add('show');
+}
+window.disciplineKeywordFocus=disciplineKeywordFocus;
+</script>
+
+
+<script>
+(function(){
+  const outputs={
+    positionality:{words:["STANDPOINT","PERSPECTIVE","CONTEXT"],prompt:"Changing where we look from can change what comes into view."},
+    intersectionality:{words:["OVERLAP","SYSTEMS","DIFFERENCE"],prompt:"Experiences of inequality are shaped by interacting identities and systems."},
+    authority:{words:["EVIDENCE","EXPERTISE","CONTEXT"],prompt:"Different sources can be authoritative for different questions."},
+    language:{words:["CATEGORIES","LABELS","POWER"],prompt:"The words used to name a topic can shape what a search makes visible."},
+    absence:{words:["SILENCE","GAPS","VOICE"],prompt:"What is difficult to find can be worth noticing, too."}
+  };
+  const buttons=document.querySelectorAll('.lens-term');
+  const wordBox=document.getElementById('lensNotice');
+  const prompt=document.getElementById('lensNoticePrompt');
+  buttons.forEach(function(btn){
+    btn.addEventListener('click',function(){
+      buttons.forEach(function(b){b.classList.remove('active')});
+      btn.classList.add('active');
+      const item=outputs[btn.dataset.lens];
+      wordBox.innerHTML=item.words.map(function(w){return '<strong>'+w+'</strong>'}).join('');
+      prompt.textContent=item.prompt;
+    });
+  });
+})();
+</script>
+
+</body></html>
